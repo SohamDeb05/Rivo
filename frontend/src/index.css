@@ -33,9 +33,10 @@ body {
   color: var(--text-primary);
   font-family: var(--font-sans);
   line-height: 1.6;
-  height: 100vh;
+  height: 100dvh;
   width: 100vw;
   overflow: hidden;
+  overscroll-behavior-y: none;
   -webkit-font-smoothing: antialiased;
 }
 
