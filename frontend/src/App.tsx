@@ -155,10 +155,11 @@ function App() {
   };
 
   const renderInput = (isCentered = false) => (
-    <div className={`flex items-center bg-[#1a1a1a]/80 backdrop-blur-xl border border-white/10 shadow-2xl rounded-full pl-12 pr-2 py-2 w-full transition-all duration-300 ${isCentered ? 'max-w-[800px]' : 'max-w-3xl mx-auto'}`}>
+    <div className={`flex items-center bg-[#1a1a1a]/80 backdrop-blur-xl border border-white/10 shadow-2xl rounded-full pr-2 py-2 w-full transition-all duration-300 ${isCentered ? 'max-w-[800px]' : 'max-w-3xl mx-auto'}`} style={{ paddingLeft: '32px' }}>
       <input
         type="text"
-        className={`flex-1 bg-transparent border-none outline-none text-gray-200 pl-4 pr-4 placeholder-gray-500 w-full ${isCentered ? 'text-lg' : 'text-base'}`}
+        className={`flex-1 bg-transparent border-none outline-none text-gray-200 pr-4 placeholder-gray-500 w-full ${isCentered ? 'text-lg' : 'text-base'}`}
+        style={{ paddingLeft: '16px' }}
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
