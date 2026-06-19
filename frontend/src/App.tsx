@@ -111,6 +111,10 @@ function App() {
   const executeSend = async (textToSend: string) => {
     if (!textToSend.trim()) return;
 
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
     const userMessage: Message = { role: 'user', content: textToSend };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
@@ -125,6 +129,13 @@ function App() {
 
       const botMessage: Message = { role: 'model', content: response.data.response, isAnimated: false };
       setMessages(prev => [...prev, botMessage]);
+
+      if (document.hidden && 'Notification' in window && Notification.permission === 'granted') {
+        const notifText = response.data.response.length > 60 
+          ? response.data.response.substring(0, 60) + '...' 
+          : response.data.response;
+        new Notification('Rivo', { body: notifText });
+      }
     } catch (error) {
       console.error('Error fetching response:', error);
       const errorMessage: Message = { 
