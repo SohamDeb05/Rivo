@@ -117,7 +117,8 @@ function App() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:7000/api/chat', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:7000';
+      const response = await axios.post(`${apiUrl}/api/chat`, {
         message: textToSend,
         history: messages
       });
@@ -155,10 +156,6 @@ function App() {
 
   const renderInput = (isCentered = false) => (
     <div className={`flex items-center bg-[#1a1a1a]/80 backdrop-blur-xl border border-white/10 shadow-2xl rounded-full pl-6 pr-2 py-2 w-full transition-all duration-300 ${isCentered ? 'max-w-[800px]' : 'max-w-3xl mx-auto'}`}>
-      <button className="text-gray-400 hover:text-white transition-colors flex items-center justify-center shrink-0 w-[40px] h-[40px] rounded-full hover:bg-white/10">
-        <Plus size={isCentered ? 24 : 20} strokeWidth={1.5} />
-      </button>
-      
       <input
         type="text"
         className={`flex-1 bg-transparent border-none outline-none text-gray-200 px-4 placeholder-gray-500 w-full ${isCentered ? 'text-lg' : 'text-base'}`}
