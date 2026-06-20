@@ -72,16 +72,17 @@ app.post('/api/chat', async (req, res) => {
     }
 
     // Find or create chat document
-    let chatDoc;
+    let isNewChat = false;
     if (chatId) {
       chatDoc = await Chat.findOne({ _id: chatId, userId });
       if (!chatDoc) {
         return res.status(404).json({ error: 'Chat not found or unauthorized' });
       }
     } else {
-      // Create new chat with a title based on the first message
+      // Create new chat with a temporary title
       const title = message.length > 30 ? message.substring(0, 30) + '...' : message;
       chatDoc = new Chat({ title, userId, messages: [] });
+      isNewChat = true;
     }
 
     // Add user message to document
@@ -102,6 +103,12 @@ app.post('/api/chat', async (req, res) => {
       history: formattedHistory,
     });
 
+    let titlePromise = null;
+    if (isNewChat) {
+      const titleModel = genAI.getGenerativeModel({ model: "gemini-flash-lite-latest" });
+      titlePromise = titleModel.generateContent(`Generate a highly concise 2 to 4 word title for this prompt. Do not use quotes or punctuation: "${message}"`);
+    }
+
     let retries = 3;
     let text = "";
     
@@ -121,8 +128,23 @@ app.post('/api/chat', async (req, res) => {
       }
     }
 
-    // Add bot message to document and save
+    // Add bot message to document
     chatDoc.messages.push({ role: 'model', content: text });
+
+    if (isNewChat && titlePromise) {
+      try {
+        const titleResult = await titlePromise;
+        let generatedTitle = titleResult.response.text().trim();
+        // Remove quotes if the AI included them
+        generatedTitle = generatedTitle.replace(/^["'](.*)["']$/, '$1');
+        if (generatedTitle) {
+          chatDoc.title = generatedTitle;
+        }
+      } catch (e) {
+        console.error("Failed to generate smart title", e);
+      }
+    }
+
     await chatDoc.save();
 
     res.json({ response: text, chatId: chatDoc._id });
