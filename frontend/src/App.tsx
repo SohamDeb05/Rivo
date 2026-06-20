@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Plus, Send, User, Sparkles, PanelLeft, SquarePen, Search, Store, Menu, Image as ImageIcon, Mic, MessageSquare, Settings, HelpCircle, History } from 'lucide-react';
+import { Plus, Send, User, Sparkles, PanelLeft, SquarePen, Search, Store, Menu, Image as ImageIcon, Mic, MessageSquare, Settings, HelpCircle, History, Square } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import axios from 'axios';
 import { LiquidButton } from '@/components/ui/liquid-glass-button';
@@ -99,6 +99,7 @@ function App() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // We remove the localStorage effect so it doesn't force it open on reload
@@ -192,6 +193,8 @@ function App() {
     setInput('');
     setIsLoading(true);
 
+    abortControllerRef.current = new AbortController();
+
     try {
       const currentUserId = user ? user.sub : localStorage.getItem('guestId');
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:7000';
@@ -199,6 +202,8 @@ function App() {
         message: textToSend,
         chatId: currentChatId,
         userId: currentUserId
+      }, {
+        signal: abortControllerRef.current.signal
       });
 
       const botMessage: Message = { role: 'model', content: response.data.response, isAnimated: false };
@@ -222,6 +227,10 @@ function App() {
         new Notification('Rivo', { body: notifText });
       }
     } catch (error) {
+      if (axios.isCancel(error)) {
+        console.log('Request canceled by user');
+        return; // Exit early without setting error message or changing loading state
+      }
       console.error('Error fetching response:', error);
       const errorMessage: Message = { 
         role: 'model', 
@@ -287,13 +296,29 @@ function App() {
           <button className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10">
             <Mic size={20} />
           </button>
-          <button 
-            className={`flex items-center justify-center transition-all rounded-full ${input.trim() && !isLoading ? 'text-white bg-white/10 hover:bg-white/20' : 'text-gray-600'} w-[36px] h-[36px]`} 
-            onClick={handleSend}
-            disabled={!input.trim() || isLoading}
-          >
-            <Send size={18} className="mr-0.5 mt-0.5" />
-          </button>
+          {isLoading ? (
+            <button 
+              className="flex items-center justify-center transition-all rounded-full bg-white hover:bg-gray-200 text-black w-[36px] h-[36px]" 
+              onClick={() => {
+                if (abortControllerRef.current) {
+                  abortControllerRef.current.abort();
+                  abortControllerRef.current = null;
+                }
+                setIsLoading(false);
+              }}
+              title="Stop generating"
+            >
+              <Square size={14} fill="currentColor" />
+            </button>
+          ) : (
+            <button 
+              className={`flex items-center justify-center transition-all rounded-full ${input.trim() ? 'text-white bg-white/10 hover:bg-white/20' : 'text-gray-600'} w-[36px] h-[36px]`} 
+              onClick={handleSend}
+              disabled={!input.trim()}
+            >
+              <Send size={18} className="mr-0.5 mt-0.5" />
+            </button>
+          )}
         </div>
       </div>
       <div className="disclaimer-text">
