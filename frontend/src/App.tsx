@@ -146,6 +146,20 @@ function App() {
       setUser(userData);
       localStorage.setItem('googleUser', JSON.stringify(userData));
       setShowAuthModal(false);
+      
+      const guestId = localStorage.getItem('guestId');
+      if (guestId) {
+        try {
+          const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:7000';
+          await axios.post(`${apiUrl}/api/chats/link`, {
+            guestId,
+            userId: userData.sub
+          });
+        } catch (e) {
+          console.error('Failed to link guest chats', e);
+        }
+      }
+
       fetchChats(userData.sub);
     } catch (error) {
       console.error('Failed to fetch user info', error);

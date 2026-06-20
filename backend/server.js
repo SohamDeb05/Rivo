@@ -42,6 +42,20 @@ app.get('/api/chats', async (req, res) => {
   }
 });
 
+// Link guest chats to a logged-in user
+app.post('/api/chats/link', async (req, res) => {
+  try {
+    const { guestId, userId } = req.body;
+    if (!guestId || !userId) return res.status(400).json({ error: 'Missing parameters' });
+    
+    await Chat.updateMany({ userId: guestId }, { $set: { userId: userId } });
+    res.json({ message: 'Chats linked successfully' });
+  } catch (error) {
+    console.error('Error linking chats:', error);
+    res.status(500).json({ error: 'Failed to link chats' });
+  }
+});
+
 // Get a specific chat's history
 app.get('/api/chats/:id', async (req, res) => {
   try {
