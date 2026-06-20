@@ -316,7 +316,7 @@ function App() {
       <aside className={`sidebar ${isSidebarOpen ? '' : 'collapsed'}`}>
         <div className="flex flex-col h-full w-[280px]">
           <div className="p-4 flex items-center">
-            <button onClick={() => setIsSidebarOpen(false)} className="text-gray-400 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors">
+            <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-gray-400 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors">
               <Menu size={24} />
             </button>
           </div>
@@ -360,7 +360,7 @@ function App() {
             {!isSidebarOpen && (
               <button 
                 onClick={() => setIsSidebarOpen(true)}
-                className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10" 
+                className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10 sm:hidden" 
                 title="Expand menu"
               >
                 <Menu size={24} />

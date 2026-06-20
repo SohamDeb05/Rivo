@@ -62,7 +62,7 @@ body {
 }
 
 .sidebar.collapsed {
-  width: 0px;
+  width: 68px;
 }
 
 @media (max-width: 768px) {
@@ -70,6 +70,9 @@ body {
     position: absolute;
     height: 100%;
     z-index: 100;
+  }
+  .sidebar.collapsed {
+    width: 0px;
   }
 }
 
