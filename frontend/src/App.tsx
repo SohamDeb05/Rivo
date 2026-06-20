@@ -440,7 +440,7 @@ function App() {
                       <User size={20} />
                     </div>
                   ) : (
-                    <div className="flex-shrink-0 mr-4 w-9 h-9 rounded-full bg-white/5 border border-white/10 shadow-sm flex items-center justify-center">
+                    <div className="flex-shrink-0 mr-4 w-9 h-9 mt-1 rounded-full bg-white/5 border border-white/10 shadow-sm flex items-center justify-center">
                       <img src="/favicon.svg" alt="Rivo" className="w-5 h-5 opacity-90" />
                     </div>
                   )}
