@@ -34,7 +34,6 @@ body {
   height: 100dvh;
   width: 100vw;
   overflow: hidden;
-  overscroll-behavior-y: none;
   -webkit-font-smoothing: antialiased;
 }
 
