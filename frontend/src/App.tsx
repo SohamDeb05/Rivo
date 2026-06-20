@@ -449,12 +449,12 @@ function App() {
           </div>
           
           <div className="flex justify-center w-2/4 sm:w-1/3">
-            <button 
-              className="flex items-center gap-2 sm:gap-3 text-white text-xl sm:text-3xl font-extrabold px-3 sm:px-5 py-2 sm:py-3 rounded-2xl hover:bg-white/5 transition-colors tracking-tight"
+            <div 
+              className="flex items-center gap-2 sm:gap-3 text-white text-xl sm:text-3xl font-extrabold transition-colors tracking-tight"
               style={{ fontFamily: 'var(--font-display)' }}
             >
               Rivo
-            </button>
+            </div>
           </div>
 
           <div className="flex items-center justify-end w-1/4 sm:w-1/3 gap-3">
