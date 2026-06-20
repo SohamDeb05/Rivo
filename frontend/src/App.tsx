@@ -436,8 +436,8 @@ function App() {
               {messages.map((msg, index) => (
                 <div key={index} className={`message ${msg.role === 'user' ? 'user' : 'bot'}`}>
                   {msg.role === 'user' ? (
-                    <div className="avatar user-avatar ml-3">
-                      <User size={20} />
+                    <div className="flex-shrink-0 ml-4 w-9 h-9 mt-1 rounded-full bg-gradient-to-br from-blue-600 to-violet-600 border border-white/10 shadow-sm flex items-center justify-center text-white font-bold text-sm">
+                      {user?.email ? user.email[0].toUpperCase() : <User size={18} className="text-white" />}
                     </div>
                   ) : (
                     <div className="flex-shrink-0 mr-4 w-9 h-9 mt-1 rounded-full bg-white/5 border border-white/10 shadow-sm flex items-center justify-center">
