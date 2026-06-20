@@ -342,7 +342,7 @@ function App() {
     <div className={`flex flex-col w-full transition-all duration-300 ${isCentered ? 'max-w-[800px]' : 'max-w-3xl mx-auto'}`}>
       <div className="flex items-center bg-[#1e1f20]/80 backdrop-blur-xl border border-white/10 shadow-2xl rounded-full px-4 py-2 w-full transition-all duration-300">
         <button className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10 shrink-0">
-          <ImageIcon size={20} />
+          <Plus size={22} />
         </button>
         <input
           type="text"
