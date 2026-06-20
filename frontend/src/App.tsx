@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Plus, Send, User, Sparkles, PanelLeft, SquarePen, Search, Store, Menu, Image as ImageIcon, Mic, MessageSquare, Settings, HelpCircle, History, Square, Trash } from 'lucide-react';
+import { Plus, Send, User, Sparkles, PanelLeft, SquarePen, Search, Store, Menu, Image as ImageIcon, Mic, MessageSquare, Settings, HelpCircle, History, Square, Trash, LogOut } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import axios from 'axios';
 import { LiquidButton } from '@/components/ui/liquid-glass-button';
@@ -108,6 +108,29 @@ function App() {
   const abortControllerRef = useRef<AbortController | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [contextMenu, setContextMenu] = useState<{x: number, y: number, chatId: string} | null>(null);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('googleUser');
+    localStorage.removeItem('guestId');
+    setMessages([]);
+    setChatHistoryList([]);
+    setCurrentChatId(null);
+    setIsProfileMenuOpen(false);
+    setShowAuthModal(true);
+  };
 
   // We remove the localStorage effect so it doesn't force it open on reload
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
@@ -431,33 +454,66 @@ function App() {
                 ))}
               </div>
               
-              <div className="py-2 shrink-0 border-t border-white/15 px-4 mt-2">
-                <button className="flex items-center text-gray-400 hover:bg-white/5 hover:text-gray-200 rounded-xl transition-colors text-sm gap-3 w-full py-2.5 px-3" title="Help">
-                  <HelpCircle size={18} className="shrink-0" />
-                  <span>Help</span>
-                </button>
-                <button className="flex items-center text-gray-400 hover:bg-white/5 hover:text-gray-200 rounded-xl transition-colors text-sm gap-3 w-full py-2.5 px-3" title="Settings">
-                  <Settings size={18} className="shrink-0" />
-                  <span>Settings</span>
-                </button>
-              </div>
+
             </>
           )}
         </div>
 
-        <div className={`mt-auto shrink-0 p-4 ${isSidebarOpen ? '' : 'flex justify-center'}`}>
+        <div ref={profileMenuRef} className={`mt-auto shrink-0 p-3 relative ${isSidebarOpen ? '' : 'flex justify-center'}`}>
+          {user && isProfileMenuOpen && (
+            <div className={`absolute bottom-full left-3 mb-2 bg-[#2f2f2f] border border-white/10 rounded-2xl shadow-xl p-2 z-50 animate-in fade-in zoom-in-95 duration-100 ${isSidebarOpen ? 'w-[260px]' : 'w-[260px] left-14 bottom-0 mb-0'}`}>
+              <div className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-xl cursor-pointer">
+                <div className="w-8 h-8 rounded-full bg-[#6a737d] flex items-center justify-center text-white font-medium text-xs shrink-0">
+                  {user.name ? user.name.split(' ').map((n: string) => n[0]).join('').substring(0,2).toUpperCase() : (user.email ? user.email[0].toUpperCase() : 'U')}
+                </div>
+                <div className="flex flex-col overflow-hidden">
+                  <span className="text-sm font-medium text-white truncate leading-tight">{user.name || user.email}</span>
+                  <span className="text-xs text-gray-400 leading-tight">Go</span>
+                </div>
+              </div>
+              
+              <div className="h-px bg-white/10 my-1 mx-1" />
+              
+              <button className="flex items-center w-full gap-3 px-2 py-2 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors">
+                <Sparkles size={16} /> Upgrade plan
+              </button>
+              <button className="flex items-center w-full gap-3 px-2 py-2 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors">
+                <Sparkles size={16} /> Personalization
+              </button>
+              <button className="flex items-center w-full gap-3 px-2 py-2 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors">
+                <User size={16} /> Profile
+              </button>
+              <button className="flex items-center w-full gap-3 px-2 py-2 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors">
+                <Settings size={16} /> Settings
+              </button>
+              
+              <div className="h-px bg-white/10 my-1 mx-1" />
+              
+              <button className="flex items-center w-full gap-3 px-2 py-2 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors">
+                <HelpCircle size={16} /> Help
+              </button>
+              <button onClick={handleLogout} className="flex items-center w-full gap-3 px-2 py-2 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors">
+                <LogOut size={16} /> Log out
+              </button>
+            </div>
+          )}
+
           {user ? (
             <button 
-              className={`flex items-center gap-3 transition-colors rounded-full ${isSidebarOpen ? 'hover:bg-white/5 w-full text-left p-1' : 'w-10 h-10 hover:ring-2 hover:ring-white/20 justify-center p-0'}`}
-              title={user.name || user.email || 'User'}
+              onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+              className={`flex items-center gap-3 transition-colors rounded-xl ${isSidebarOpen ? 'hover:bg-white/5 w-full text-left p-2' : 'w-10 h-10 hover:bg-white/10 justify-center p-0'}`}
             >
-              <div className="w-8 h-8 rounded-full bg-black border border-white/20 shadow-sm flex items-center justify-center text-white font-bold text-sm shrink-0">
-                {user.name ? user.name[0].toUpperCase() : (user.email ? user.email[0].toUpperCase() : 'U')}
+              <div className="w-8 h-8 rounded-full bg-[#6a737d] flex items-center justify-center text-white font-medium text-xs shrink-0">
+                {user.name ? user.name.split(' ').map((n: string) => n[0]).join('').substring(0,2).toUpperCase() : (user.email ? user.email[0].toUpperCase() : 'U')}
               </div>
               {isSidebarOpen && (
-                <span className="text-sm font-medium text-gray-300 truncate pr-2">
-                  {user.name || user.email}
-                </span>
+                <>
+                  <div className="flex flex-col flex-1 overflow-hidden">
+                    <span className="text-sm font-medium text-white truncate leading-tight">{user.name || user.email}</span>
+                    <span className="text-xs text-gray-400 leading-tight">Go</span>
+                  </div>
+                  <Store size={18} className="text-gray-400 shrink-0" />
+                </>
               )}
             </button>
           ) : (
