@@ -4,7 +4,6 @@ import ReactMarkdown from 'react-markdown';
 import axios from 'axios';
 import { LiquidButton } from '@/components/ui/liquid-glass-button';
 import { DottedSurface } from '@/components/ui/dotted-surface';
-import { jwtDecode } from "jwt-decode";
 import { AuthModal } from '@/components/ui/auth-modal';
 import './index.css';
 
@@ -100,7 +99,18 @@ function App() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('sidebarOpen');
+      if (saved !== null) return saved === 'true';
+      return window.innerWidth >= 768;
+    }
+    return true;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('sidebarOpen', String(isSidebarOpen));
+  }, [isSidebarOpen]);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [chatHistoryList, setChatHistoryList] = useState<any[]>([]);
   
@@ -128,36 +138,38 @@ function App() {
     }
   };
 
-  const handleLoginSuccess = (credentialResponse: any) => {
-    const decoded: any = jwtDecode(credentialResponse.credential);
-    setUser(decoded);
-    localStorage.setItem('googleToken', credentialResponse.credential);
-    setShowAuthModal(false);
-    fetchChats(decoded.sub);
+  const handleLoginSuccess = async (tokenResponse: any) => {
+    try {
+      const res = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+      });
+      const userData = res.data; // contains { sub, name, email, picture }
+      setUser(userData);
+      localStorage.setItem('googleUser', JSON.stringify(userData));
+      setShowAuthModal(false);
+      fetchChats(userData.sub);
+    } catch (error) {
+      console.error('Failed to fetch user info', error);
+      alert('Login failed. Please try again.');
+    }
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('googleToken');
-    if (token) {
+    const savedUser = localStorage.getItem('googleUser');
+    if (savedUser) {
       try {
-        const decoded: any = jwtDecode(token);
-        // Basic check if token is expired
-        if (decoded.exp * 1000 < Date.now()) {
-          localStorage.removeItem('googleToken');
-          setUser(null);
-          fetchChats(localStorage.getItem('guestId') || 'guest');
-        } else {
-          setUser(decoded);
-          fetchChats(decoded.sub);
-        }
+        const parsed = JSON.parse(savedUser);
+        setUser(parsed);
+        fetchChats(parsed.sub);
       } catch (e) {
-        localStorage.removeItem('googleToken');
+        localStorage.removeItem('googleUser');
+        fetchChats(localStorage.getItem('guestId') || 'guest');
       }
     } else {
       fetchChats(localStorage.getItem('guestId') || 'guest');
     }
 
-    if (!localStorage.getItem('hasSeenAuth') && !token) {
+    if (!localStorage.getItem('hasSeenAuth') && !savedUser) {
       setShowAuthModal(true);
       localStorage.setItem('hasSeenAuth', 'true');
     }
