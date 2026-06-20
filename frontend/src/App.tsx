@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Plus, Send, User, Sparkles, PanelLeft, SquarePen, Search, Store, Menu, Image as ImageIcon, Mic, MessageSquare, Settings, HelpCircle, History, Square, Trash, LogOut } from 'lucide-react';
+import { Plus, Send, User, Sparkles, PanelLeft, SquarePen, Search, Store, Menu, Image as ImageIcon, Mic, MessageSquare, Settings, HelpCircle, History, Square, Trash, LogOut, Paperclip, Triangle, MoreHorizontal, ImagePlus } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import axios from 'axios';
 import { LiquidButton } from '@/components/ui/liquid-glass-button';
@@ -110,11 +110,16 @@ function App() {
   const [contextMenu, setContextMenu] = useState<{x: number, y: number, chatId: string} | null>(null);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+  const [isAttachmentMenuOpen, setIsAttachmentMenuOpen] = useState(false);
+  const attachmentMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) {
         setIsProfileMenuOpen(false);
+      }
+      if (attachmentMenuRef.current && !attachmentMenuRef.current.contains(e.target as Node)) {
+        setIsAttachmentMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -341,9 +346,40 @@ function App() {
   const renderInput = (isCentered = false) => (
     <div className={`flex flex-col w-full transition-all duration-300 ${isCentered ? 'max-w-[800px]' : 'max-w-3xl mx-auto'}`}>
       <div className="flex items-center bg-[#1e1f20]/80 backdrop-blur-xl border border-white/10 shadow-2xl rounded-full px-4 py-2 w-full transition-all duration-300">
-        <button className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10 shrink-0">
-          <Plus size={22} />
-        </button>
+        <div ref={attachmentMenuRef} className="relative">
+          <button 
+            onClick={() => setIsAttachmentMenuOpen(!isAttachmentMenuOpen)}
+            className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10 shrink-0"
+          >
+            <Plus size={22} />
+          </button>
+          
+          {isAttachmentMenuOpen && (
+            <div className="absolute bottom-full left-0 mb-3 bg-[#2f2f2f] border border-white/10 rounded-2xl shadow-2xl p-2 z-50 w-64 animate-in fade-in zoom-in-95 duration-100 origin-bottom-left">
+              <button className="flex items-center w-full gap-3 px-3 py-2.5 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors font-medium">
+                <Paperclip size={18} className="shrink-0" /> Upload files
+              </button>
+              <button className="flex items-center w-full gap-3 px-3 py-2.5 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors font-medium">
+                <Triangle size={18} className="shrink-0" /> Add from Drive
+              </button>
+              <button className="flex items-center justify-between w-full gap-3 px-3 py-2.5 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors font-medium">
+                <div className="flex items-center gap-3">
+                  <MoreHorizontal size={18} className="shrink-0" /> More uploads
+                </div>
+                <span className="text-gray-400 text-xs">&gt;</span>
+              </button>
+              
+              <div className="h-px bg-white/10 my-1.5 mx-2" />
+              
+              <button className="flex items-center justify-between w-full gap-3 px-3 py-2.5 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors font-medium">
+                <div className="flex items-center gap-3">
+                  <ImagePlus size={18} className="shrink-0" /> Create image
+                </div>
+                <span className="bg-white/10 px-2 py-0.5 rounded-full text-xs text-white">New</span>
+              </button>
+            </div>
+          )}
+        </div>
         <input
           type="text"
           className={`flex-1 bg-transparent border-none outline-none text-gray-200 px-3 placeholder-gray-500 w-full ${isCentered ? 'text-lg' : 'text-base'}`}
