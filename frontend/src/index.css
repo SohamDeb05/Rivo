@@ -59,6 +59,7 @@ body {
   flex-direction: column;
   z-index: 50;
   flex-shrink: 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .sidebar.collapsed {
