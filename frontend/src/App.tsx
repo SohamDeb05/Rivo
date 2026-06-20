@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Plus, Send, User, Sparkles, PanelLeft, SquarePen, Search, Store } from 'lucide-react';
+import { Plus, Send, User, Sparkles, PanelLeft, SquarePen, Search, Store, Menu, Image as ImageIcon, Mic, MessageSquare, Settings, HelpCircle, History } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import axios from 'axios';
 import { LiquidButton } from '@/components/ui/liquid-glass-button';
 import { DottedSurface } from '@/components/ui/dotted-surface';
+import { jwtDecode } from "jwt-decode";
+import { AuthModal } from '@/components/ui/auth-modal';
 import './index.css';
 
 interface Message {
@@ -98,10 +100,71 @@ function App() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [currentChatId, setCurrentChatId] = useState<string | null>(null);
+  const [chatHistoryList, setChatHistoryList] = useState<any[]>([]);
+  
+  // Auth & Guest State
+  const [user, setUser] = useState<any>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [forceSignIn, setForceSignIn] = useState(false);
+  const [guestCount, setGuestCount] = useState(() => parseInt(localStorage.getItem('guestCount') || '0', 10));
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
+
+  const fetchChats = async (uid?: string) => {
+    try {
+      const currentUserId = uid || (user ? user.sub : localStorage.getItem('guestId'));
+      if (!currentUserId) return;
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:7000';
+      const response = await axios.get(`${apiUrl}/api/chats?userId=${currentUserId}`);
+      setChatHistoryList(response.data);
+    } catch (error) {
+      console.error('Error fetching chat history list:', error);
+    }
+  };
+
+  const handleLoginSuccess = (credentialResponse: any) => {
+    const decoded: any = jwtDecode(credentialResponse.credential);
+    setUser(decoded);
+    localStorage.setItem('googleToken', credentialResponse.credential);
+    setShowAuthModal(false);
+    fetchChats(decoded.sub);
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem('googleToken');
+    if (token) {
+      try {
+        const decoded: any = jwtDecode(token);
+        // Basic check if token is expired
+        if (decoded.exp * 1000 < Date.now()) {
+          localStorage.removeItem('googleToken');
+          setUser(null);
+          fetchChats(localStorage.getItem('guestId') || 'guest');
+        } else {
+          setUser(decoded);
+          fetchChats(decoded.sub);
+        }
+      } catch (e) {
+        localStorage.removeItem('googleToken');
+      }
+    } else {
+      fetchChats(localStorage.getItem('guestId') || 'guest');
+    }
+
+    if (!localStorage.getItem('hasSeenAuth') && !token) {
+      setShowAuthModal(true);
+      localStorage.setItem('hasSeenAuth', 'true');
+    }
+
+    if (!localStorage.getItem('guestId')) {
+      localStorage.setItem('guestId', 'guest-' + Math.random().toString(36).substring(2, 9));
+    }
   }, []);
 
   useEffect(() => {
@@ -110,6 +173,12 @@ function App() {
 
   const executeSend = async (textToSend: string) => {
     if (!textToSend.trim()) return;
+
+    if (!user && guestCount >= 10) {
+      setForceSignIn(true);
+      setShowAuthModal(true);
+      return;
+    }
 
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
@@ -121,14 +190,27 @@ function App() {
     setIsLoading(true);
 
     try {
+      const currentUserId = user ? user.sub : localStorage.getItem('guestId');
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:7000';
       const response = await axios.post(`${apiUrl}/api/chat`, {
         message: textToSend,
-        history: messages
+        chatId: currentChatId,
+        userId: currentUserId
       });
 
       const botMessage: Message = { role: 'model', content: response.data.response, isAnimated: false };
       setMessages(prev => [...prev, botMessage]);
+      
+      if (!user) {
+        const newCount = guestCount + 1;
+        setGuestCount(newCount);
+        localStorage.setItem('guestCount', newCount.toString());
+      }
+
+      if (!currentChatId && response.data.chatId) {
+        setCurrentChatId(response.data.chatId);
+        fetchChats(); // Refresh the sidebar list
+      }
 
       if (document.hidden && 'Notification' in window && Notification.permission === 'granted') {
         const notifText = response.data.response.length > 60 
@@ -163,46 +245,124 @@ function App() {
   const handleNewChat = () => {
     setMessages([]);
     setInput('');
+    setCurrentChatId(null);
+  };
+
+  const loadChat = async (id: string) => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:7000';
+      const response = await axios.get(`${apiUrl}/api/chats/${id}`);
+      setCurrentChatId(id);
+      setMessages(response.data.messages);
+      if (window.innerWidth < 640) {
+        setIsSidebarOpen(false);
+      }
+    } catch (error) {
+      console.error('Error loading chat:', error);
+    }
+  };
+
+  const handleSuggestionClick = (text: string) => {
+    executeSend(text);
   };
 
   const renderInput = (isCentered = false) => (
-    <div className={`flex items-center bg-[#1a1a1a]/80 backdrop-blur-xl border border-white/10 shadow-2xl rounded-full pr-2 py-2 w-full transition-all duration-300 ${isCentered ? 'max-w-[800px]' : 'max-w-3xl mx-auto'}`} style={{ paddingLeft: '32px' }}>
-      <input
-        type="text"
-        className={`flex-1 bg-transparent border-none outline-none text-gray-200 pr-4 placeholder-gray-500 w-full ${isCentered ? 'text-lg' : 'text-base'}`}
-        style={{ paddingLeft: '16px' }}
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder="Ask anything"
-      />
-      
-      <div className="flex items-center shrink-0">
-        <button 
-          className={`flex items-center justify-center transition-all shrink-0 rounded-full ${input.trim() && !isLoading ? 'text-white hover:bg-white/10' : 'text-gray-600'} w-[40px] h-[40px]`} 
-          onClick={handleSend}
-          disabled={!input.trim() || isLoading}
-        >
-          <Send size={isCentered ? 22 : 20} strokeWidth={1.5} className="mr-0.5 mt-0.5" />
+    <div className={`flex flex-col w-full transition-all duration-300 ${isCentered ? 'max-w-[800px]' : 'max-w-3xl mx-auto'}`}>
+      <div className="flex items-center bg-[#1e1f20]/80 backdrop-blur-xl border border-white/10 shadow-2xl rounded-full px-4 py-2 w-full transition-all duration-300">
+        <button className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10 shrink-0">
+          <ImageIcon size={20} />
         </button>
+        <input
+          type="text"
+          className={`flex-1 bg-transparent border-none outline-none text-gray-200 px-3 placeholder-gray-500 w-full ${isCentered ? 'text-lg' : 'text-base'}`}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Ask anything"
+        />
+        <div className="flex items-center shrink-0 gap-1">
+          <button className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10">
+            <Mic size={20} />
+          </button>
+          <button 
+            className={`flex items-center justify-center transition-all rounded-full ${input.trim() && !isLoading ? 'text-white bg-white/10 hover:bg-white/20' : 'text-gray-600'} w-[36px] h-[36px]`} 
+            onClick={handleSend}
+            disabled={!input.trim() || isLoading}
+          >
+            <Send size={18} className="mr-0.5 mt-0.5" />
+          </button>
+        </div>
+      </div>
+      <div className="disclaimer-text">
+        Rivo can make mistakes. Consider verifying important information.
       </div>
     </div>
   );
 
   return (
     <div className="app-container">
+      <AuthModal 
+        isOpen={showAuthModal} 
+        onClose={() => {
+          if (!forceSignIn) setShowAuthModal(false);
+        }} 
+        forceSignIn={forceSignIn}
+        onSuccess={handleLoginSuccess}
+      />
+      {/* Sidebar */}
+      <aside className={`sidebar ${isSidebarOpen ? '' : 'collapsed'}`}>
+        <div className="flex flex-col h-full w-[280px]">
+          <div className="p-4 flex items-center">
+            <button onClick={() => setIsSidebarOpen(false)} className="text-gray-400 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors">
+              <Menu size={24} />
+            </button>
+          </div>
+          <div className="px-4 py-2">
+            <button onClick={handleNewChat} className="flex items-center gap-3 text-gray-200 bg-[#1e1f20] hover:bg-[#2a2b2c] transition-colors py-2.5 px-4 rounded-full w-full font-medium text-sm border border-white/5">
+              <Plus size={20} />
+              <span>New chat</span>
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto px-4 py-4">
+            <h3 className="text-xs font-semibold text-gray-500 mb-3 px-2">Recent</h3>
+            {chatHistoryList.map((chat) => (
+              <button 
+                key={chat._id} 
+                onClick={() => loadChat(chat._id)}
+                className={`flex items-center gap-3 w-full py-2.5 px-3 rounded-xl transition-colors text-sm text-left truncate ${currentChatId === chat._id ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200'}`}
+              >
+                <MessageSquare size={16} className="shrink-0" />
+                <span className="truncate">{chat.title || 'New Chat'}</span>
+              </button>
+            ))}
+          </div>
+          <div className="px-4 py-4 border-t border-white/5">
+            <button className="flex items-center gap-3 text-gray-400 hover:bg-white/5 hover:text-gray-200 w-full py-2.5 px-3 rounded-xl transition-colors text-sm">
+              <HelpCircle size={18} />
+              <span>Help</span>
+            </button>
+            <button className="flex items-center gap-3 text-gray-400 hover:bg-white/5 hover:text-gray-200 w-full py-2.5 px-3 rounded-xl transition-colors text-sm">
+              <Settings size={18} />
+              <span>Settings</span>
+            </button>
+          </div>
+        </div>
+      </aside>
+
       {/* Main Content */}
       <main className="main-content relative flex flex-col h-full">
         {/* Top Navbar */}
-        <header className="flex items-center justify-between px-4 sm:px-8 py-3 sm:py-5 bg-[#000000] z-50 shrink-0">
+        <header className="flex items-center justify-between px-4 sm:px-8 py-3 sm:py-5 bg-transparent z-50 shrink-0">
           <div className="flex items-center w-1/4 sm:w-1/3">
-            <button 
-              className="text-gray-400 hover:text-white transition-colors p-2 sm:p-3 rounded-xl hover:bg-white/10" 
-              title="New Chat"
-              onClick={handleNewChat}
-            >
-              <SquarePen size={28} strokeWidth={1.5} />
-            </button>
+            {!isSidebarOpen && (
+              <button 
+                onClick={() => setIsSidebarOpen(true)}
+                className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10" 
+                title="Expand menu"
+              >
+                <Menu size={24} />
+              </button>
+            )}
           </div>
           
           <div className="flex justify-center w-2/4 sm:w-1/3">
@@ -214,8 +374,32 @@ function App() {
             </button>
           </div>
 
-          <div className="flex items-center justify-end w-1/4 sm:w-1/3">
-            {/* Empty space to balance the navbar flex layout */}
+          <div className="flex items-center justify-end w-1/4 sm:w-1/3 gap-3">
+            {!user && (
+              <button 
+                className="text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-4 py-1.5 rounded-full transition-colors hidden sm:block"
+                onClick={() => {
+                  setForceSignIn(false);
+                  setShowAuthModal(true);
+                }}
+              >
+                Sign In
+              </button>
+            )}
+            {messages.length > 0 && (
+              <button 
+                className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10" 
+                title="New Chat"
+                onClick={handleNewChat}
+              >
+                <SquarePen size={24} />
+              </button>
+            )}
+            {user && (
+              <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm cursor-pointer" title={user.email || 'User'}>
+                {user.email ? user.email[0].toUpperCase() : 'U'}
+              </div>
+            )}
           </div>
         </header>
 
@@ -228,6 +412,18 @@ function App() {
               <div className="centered-input-container">
                 {renderInput(true)}
               </div>
+
+              <div className="suggestion-chips mt-4">
+                <button onClick={() => handleSuggestionClick('Write a React component for a responsive navbar')}>
+                  <span>⚛️</span> React Navbar
+                </button>
+                <button onClick={() => handleSuggestionClick('Explain how quantum computers work to a 5 year old')}>
+                  <span>🧠</span> Quantum Computing
+                </button>
+                <button onClick={() => handleSuggestionClick('Help me debug this TypeScript error')}>
+                  <span>🐛</span> Debug TS Error
+                </button>
+              </div>
             </div>
           </div>
         ) : (
@@ -235,6 +431,11 @@ function App() {
             <div className="chat-container">
               {messages.map((msg, index) => (
                 <div key={index} className={`message ${msg.role === 'user' ? 'user' : 'bot'}`}>
+                  {msg.role === 'user' ? (
+                    <div className="avatar user-avatar ml-3">
+                      <User size={20} />
+                    </div>
+                  ) : null}
                   <div className="message-content">
                     {msg.role === 'user' ? (
                       <p>{msg.content}</p>

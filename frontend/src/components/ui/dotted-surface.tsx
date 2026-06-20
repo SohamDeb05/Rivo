@@ -31,8 +31,16 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
 			alpha: true,
 			antialias: true,
 		});
-		renderer.setPixelRatio(window.devicePixelRatio);
+		// Cap pixel ratio to 2 for performance on high-DPI screens (e.g. retina)
+		renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 		renderer.setSize(window.innerWidth, window.innerHeight);
+
+		// Pause animation when component is off-screen
+		let isVisible = true;
+		const observer = new IntersectionObserver((entries) => {
+			isVisible = entries[0].isIntersecting;
+		});
+		observer.observe(container);
 		// Transparent background
 		renderer.setClearColor(0x000000, 0);
 
@@ -78,15 +86,27 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
 		const animate = () => {
 			animationId = requestAnimationFrame(animate);
 
+			// Skip heavy rendering and math if the canvas isn't visible
+			if (!isVisible) return;
+
 			const positionsArray = geometry.attributes.position.array as Float32Array;
+
+			// Precompute sine waves to reduce Math.sin calls from 4800 to 100 per frame
+			const sinX = new Float32Array(AMOUNTX);
+			for (let ix = 0; ix < AMOUNTX; ix++) {
+				sinX[ix] = Math.sin((ix + count) * 0.3) * 50;
+			}
+			const sinY = new Float32Array(AMOUNTY);
+			for (let iy = 0; iy < AMOUNTY; iy++) {
+				sinY[iy] = Math.sin((iy + count) * 0.5) * 50;
+			}
 
 			let i = 0;
 			for (let ix = 0; ix < AMOUNTX; ix++) {
+				const sx = sinX[ix];
 				for (let iy = 0; iy < AMOUNTY; iy++) {
 					const index = i * 3;
-					positionsArray[index + 1] =
-						Math.sin((ix + count) * 0.3) * 50 +
-						Math.sin((iy + count) * 0.5) * 50;
+					positionsArray[index + 1] = sx + sinY[iy];
 					i++;
 				}
 			}
@@ -111,6 +131,7 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
 		animate();
 
 		return () => {
+			observer.disconnect();
 			window.removeEventListener('resize', handleResize);
 			cancelAnimationFrame(animationId);
 			
