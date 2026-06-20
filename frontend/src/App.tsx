@@ -359,15 +359,6 @@ function App() {
               <button className="flex items-center w-full gap-3 px-3 py-2.5 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors font-medium">
                 <Paperclip size={18} className="shrink-0" /> Upload files
               </button>
-              <button className="flex items-center w-full gap-3 px-3 py-2.5 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors font-medium">
-                <Triangle size={18} className="shrink-0" /> Add from Drive
-              </button>
-              <button className="flex items-center justify-between w-full gap-3 px-3 py-2.5 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors font-medium">
-                <div className="flex items-center gap-3">
-                  <MoreHorizontal size={18} className="shrink-0" /> More uploads
-                </div>
-                <span className="text-gray-400 text-xs">&gt;</span>
-              </button>
               
               <div className="h-px bg-white/10 my-1.5 mx-2" />
               
