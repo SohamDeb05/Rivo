@@ -348,7 +348,7 @@ function App() {
                 ))}
               </div>
               
-              <div className="py-4 border-t border-white/5 px-4">
+              <div className="py-4 border-t border-white/15 px-4">
                 <button className="flex items-center text-gray-400 hover:bg-white/5 hover:text-gray-200 rounded-xl transition-colors text-sm gap-3 w-full py-2.5 px-3" title="Help">
                   <HelpCircle size={18} className="shrink-0" />
                   <span>Help</span>
