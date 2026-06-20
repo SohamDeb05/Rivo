@@ -449,14 +449,14 @@ function App() {
           {user ? (
             <button 
               className={`flex items-center gap-3 transition-colors rounded-full ${isSidebarOpen ? 'hover:bg-white/5 w-full text-left p-1' : 'w-10 h-10 hover:ring-2 hover:ring-white/20 justify-center p-0'}`}
-              title={user.email || 'User'}
+              title={user.name || user.email || 'User'}
             >
               <div className="w-8 h-8 rounded-full bg-black border border-white/20 shadow-sm flex items-center justify-center text-white font-bold text-sm shrink-0">
-                {user.email ? user.email[0].toUpperCase() : 'U'}
+                {user.name ? user.name[0].toUpperCase() : (user.email ? user.email[0].toUpperCase() : 'U')}
               </div>
               {isSidebarOpen && (
                 <span className="text-sm font-medium text-gray-300 truncate pr-2">
-                  {user.email}
+                  {user.name || user.email}
                 </span>
               )}
             </button>
