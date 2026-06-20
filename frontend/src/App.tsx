@@ -427,17 +427,7 @@ function App() {
                 {renderInput(true)}
               </div>
 
-              <div className="suggestion-chips mt-4">
-                <button onClick={() => handleSuggestionClick('Write a React component for a responsive navbar')}>
-                  <span>⚛️</span> React Navbar
-                </button>
-                <button onClick={() => handleSuggestionClick('Explain how quantum computers work to a 5 year old')}>
-                  <span>🧠</span> Quantum Computing
-                </button>
-                <button onClick={() => handleSuggestionClick('Help me debug this TypeScript error')}>
-                  <span>🐛</span> Debug TS Error
-                </button>
-              </div>
+
             </div>
           </div>
         ) : (
