@@ -459,7 +459,7 @@ function App() {
           )}
         </div>
 
-        <div ref={profileMenuRef} className={`mt-auto shrink-0 p-3 relative ${isSidebarOpen ? '' : 'flex justify-center'}`}>
+        <div ref={profileMenuRef} className={`mt-auto shrink-0 p-3 relative border-t border-white/10 ${isSidebarOpen ? '' : 'flex justify-center'}`}>
           {user && isProfileMenuOpen && (
             <div className={`absolute bottom-full left-3 mb-2 bg-[#2f2f2f] border border-white/10 rounded-2xl shadow-xl p-2 z-50 animate-in fade-in zoom-in-95 duration-100 ${isSidebarOpen ? 'w-[260px]' : 'w-[260px] left-14 bottom-0 mb-0'}`}>
               <div className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-xl cursor-pointer">
