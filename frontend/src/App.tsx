@@ -463,7 +463,7 @@ function App() {
           {user && isProfileMenuOpen && (
             <div className={`absolute bottom-full left-3 mb-2 bg-[#2f2f2f] border border-white/10 rounded-2xl shadow-xl p-2 z-50 animate-in fade-in zoom-in-95 duration-100 ${isSidebarOpen ? 'w-[260px]' : 'w-[260px] left-14 bottom-0 mb-0'}`}>
               <div className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-xl cursor-pointer">
-                <div className="w-8 h-8 rounded-full bg-[#6a737d] flex items-center justify-center text-white font-bold text-sm shrink-0">
+                <div className="w-8 h-8 rounded-full bg-black border border-white/20 flex items-center justify-center text-white font-bold text-sm shrink-0">
                   {user.name ? user.name.split(' ').map((n: string) => n[0]).join('').substring(0,2).toUpperCase() : (user.email ? user.email[0].toUpperCase() : 'U')}
                 </div>
                 <div className="flex flex-col overflow-hidden">
@@ -503,7 +503,7 @@ function App() {
               onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
               className={`flex items-center gap-3 transition-colors rounded-xl ${isSidebarOpen ? 'hover:bg-white/5 w-full text-left p-2' : 'w-10 h-10 hover:bg-white/10 justify-center p-0'}`}
             >
-              <div className="w-8 h-8 rounded-full bg-[#6a737d] flex items-center justify-center text-white font-bold text-sm shrink-0">
+              <div className="w-8 h-8 rounded-full bg-black border border-white/20 flex items-center justify-center text-white font-bold text-sm shrink-0">
                 {user.name ? user.name.split(' ').map((n: string) => n[0]).join('').substring(0,2).toUpperCase() : (user.email ? user.email[0].toUpperCase() : 'U')}
               </div>
               {isSidebarOpen && (
