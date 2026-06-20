@@ -392,17 +392,17 @@ function App() {
         onSuccess={handleLoginSuccess}
       />
       {/* Sidebar */}
-      <aside className={`sidebar ${isSidebarOpen ? '' : 'collapsed'}`}>
-        <div className="flex flex-col h-full w-full">
-          <div className={`p-4 flex items-center ${isSidebarOpen ? '' : 'justify-center'}`}>
-            <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-gray-400 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors">
-              <Menu size={24} />
-            </button>
-          </div>
-          
+      <aside className={`sidebar ${isSidebarOpen ? '' : 'collapsed'} flex flex-col`}>
+        <div className={`p-4 flex items-center shrink-0 ${isSidebarOpen ? '' : 'justify-center'}`}>
+          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-gray-400 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors">
+            <Menu size={24} />
+          </button>
+        </div>
+        
+        <div className="flex-1 overflow-hidden flex flex-col">
           {isSidebarOpen && (
             <>
-              <div className="px-4 py-2 flex">
+              <div className="px-4 py-2 flex shrink-0">
                 <button 
                   onClick={handleNewChat} 
                   className="flex items-center text-gray-200 transition-colors rounded-full font-medium text-sm border border-white/5 gap-3 bg-[#1e1f20] hover:bg-[#2a2b2c] py-2.5 px-4 w-full"
@@ -431,7 +431,7 @@ function App() {
                 ))}
               </div>
               
-              <div className="py-4 border-t border-white/15 px-4">
+              <div className="py-2 shrink-0 border-t border-white/15 px-4 mt-2">
                 <button className="flex items-center text-gray-400 hover:bg-white/5 hover:text-gray-200 rounded-xl transition-colors text-sm gap-3 w-full py-2.5 px-3" title="Help">
                   <HelpCircle size={18} className="shrink-0" />
                   <span>Help</span>
@@ -442,6 +442,39 @@ function App() {
                 </button>
               </div>
             </>
+          )}
+        </div>
+
+        <div className={`mt-auto shrink-0 p-4 ${isSidebarOpen ? '' : 'flex justify-center'}`}>
+          {user ? (
+            <button 
+              className={`flex items-center gap-3 transition-colors rounded-full ${isSidebarOpen ? 'hover:bg-white/5 w-full text-left p-1' : 'w-10 h-10 hover:ring-2 hover:ring-white/20 justify-center p-0'}`}
+              title={user.email || 'User'}
+            >
+              <div className="w-8 h-8 rounded-full bg-black border border-white/20 shadow-sm flex items-center justify-center text-white font-bold text-sm shrink-0">
+                {user.email ? user.email[0].toUpperCase() : 'U'}
+              </div>
+              {isSidebarOpen && (
+                <span className="text-sm font-medium text-gray-300 truncate pr-2">
+                  {user.email}
+                </span>
+              )}
+            </button>
+          ) : (
+            <button 
+              className={`flex items-center gap-3 transition-colors ${isSidebarOpen ? 'w-full text-left text-sm font-semibold text-black bg-white hover:bg-gray-100 px-4 py-2.5 rounded-full justify-center' : 'text-gray-400 hover:text-white p-2 rounded-full hover:bg-white/10'}`}
+              onClick={() => {
+                setForceSignIn(false);
+                setShowAuthModal(true);
+              }}
+              title="Sign In"
+            >
+              {isSidebarOpen ? (
+                <span className="text-center font-bold">Sign In</span>
+              ) : (
+                <User size={20} />
+              )}
+            </button>
           )}
         </div>
       </aside>
@@ -472,17 +505,6 @@ function App() {
           </div>
 
           <div className="flex items-center justify-end w-1/4 sm:w-1/3 gap-3">
-            {!user && (
-              <button 
-                className="text-sm font-semibold text-black bg-white hover:bg-gray-100 px-5 py-1.5 rounded-full transition-colors hidden sm:block"
-                onClick={() => {
-                  setForceSignIn(false);
-                  setShowAuthModal(true);
-                }}
-              >
-                Sign In
-              </button>
-            )}
             {messages.length > 0 && (
               <button 
                 className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10" 
@@ -491,9 +513,6 @@ function App() {
               >
                 <SquarePen size={24} />
               </button>
-            )}
-            {user && (
-              <div className="hidden"></div>
             )}
           </div>
         </header>
