@@ -505,6 +505,17 @@ function App() {
           </div>
 
           <div className="flex items-center justify-end w-1/4 sm:w-1/3 gap-3">
+            {!user && (
+              <button 
+                className="text-sm font-semibold text-black bg-white hover:bg-gray-100 px-5 py-1.5 rounded-full transition-colors hidden sm:block"
+                onClick={() => {
+                  setForceSignIn(false);
+                  setShowAuthModal(true);
+                }}
+              >
+                Sign In
+              </button>
+            )}
             {messages.length > 0 && (
               <button 
                 className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10" 
