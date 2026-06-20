@@ -56,6 +56,20 @@ app.get('/api/chats/:id', async (req, res) => {
   }
 });
 
+// Delete a specific chat
+app.delete('/api/chats/:id', async (req, res) => {
+  try {
+    const chat = await Chat.findByIdAndDelete(req.params.id);
+    if (!chat) {
+      return res.status(404).json({ error: 'Chat not found' });
+    }
+    res.json({ message: 'Chat deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting chat:', error);
+    res.status(500).json({ error: 'Failed to delete chat' });
+  }
+});
+
 app.post('/api/chat', async (req, res) => {
   try {
     const { message, chatId, userId } = req.body;

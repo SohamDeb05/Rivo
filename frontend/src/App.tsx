@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Plus, Send, User, Sparkles, PanelLeft, SquarePen, Search, Store, Menu, Image as ImageIcon, Mic, MessageSquare, Settings, HelpCircle, History, Square } from 'lucide-react';
+import { Plus, Send, User, Sparkles, PanelLeft, SquarePen, Search, Store, Menu, Image as ImageIcon, Mic, MessageSquare, Settings, HelpCircle, History, Square, Trash } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import axios from 'axios';
 import { LiquidButton } from '@/components/ui/liquid-glass-button';
@@ -107,6 +107,7 @@ function App() {
   const [isAnimating, setIsAnimating] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [contextMenu, setContextMenu] = useState<{x: number, y: number, chatId: string} | null>(null);
 
   // We remove the localStorage effect so it doesn't force it open on reload
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
@@ -281,6 +282,21 @@ function App() {
     }
   };
 
+  const handleDeleteChat = async (id: string) => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:7000';
+      await axios.delete(`${apiUrl}/api/chats/${id}`);
+      if (currentChatId === id) {
+        setCurrentChatId(null);
+        setMessages([]);
+      }
+      fetchChats();
+      setContextMenu(null);
+    } catch (error) {
+      console.error('Error deleting chat:', error);
+    }
+  };
+
   const handleSuggestionClick = (text: string) => {
     executeSend(text);
   };
@@ -336,7 +352,23 @@ function App() {
   );
 
   return (
-    <div className="app-container">
+    <div className="app-container" onClick={() => setContextMenu(null)}>
+      {contextMenu && (
+        <div 
+          className="fixed z-[100] bg-[#2f2f2f] border border-white/10 shadow-xl rounded-lg py-1 min-w-[150px]"
+          style={{ top: contextMenu.y, left: contextMenu.x }}
+        >
+          <button 
+            className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/5 flex items-center gap-2"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDeleteChat(contextMenu.chatId);
+            }}
+          >
+            <Trash size={16} /> Delete Chat
+          </button>
+        </div>
+      )}
       <AuthModal 
         isOpen={showAuthModal} 
         onClose={() => {
@@ -373,6 +405,10 @@ function App() {
                   <button 
                     key={chat._id} 
                     onClick={() => loadChat(chat._id)}
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      setContextMenu({ x: e.clientX, y: e.clientY, chatId: chat._id });
+                    }}
                     className={`flex items-center w-full py-2.5 rounded-xl transition-colors text-sm text-left truncate gap-3 px-3 ${currentChatId === chat._id ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200'}`}
                   >
                     <MessageSquare size={16} className="shrink-0" />
