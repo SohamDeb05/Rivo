@@ -13,11 +13,16 @@ interface Message {
   isAnimated?: boolean;
 }
 
-const TypingMessage = ({ content, onComplete, onTyping }: { content: string, onComplete?: () => void, onTyping?: () => void }) => {
+const TypingMessage = ({ content, isAnimating, onComplete, onTyping, onStop }: { content: string, isAnimating?: boolean, onComplete?: () => void, onTyping?: () => void, onStop?: (partialContent: string) => void }) => {
   const [displayedContent, setDisplayedContent] = useState('');
   
   useEffect(() => {
-    let index = 0;
+    if (isAnimating === false && displayedContent.length > 0) {
+      onStop?.(displayedContent);
+      return;
+    }
+
+    let index = displayedContent.length;
     const timer = setInterval(() => {
       index++;
       setDisplayedContent(content.substring(0, index));
@@ -27,10 +32,10 @@ const TypingMessage = ({ content, onComplete, onTyping }: { content: string, onC
         clearInterval(timer);
         onComplete?.();
       }
-    }, 15); // 15ms per character creates a nice 'slow typing' effect
+    }, 15);
 
     return () => clearInterval(timer);
-  }, [content]); // Intentionally omitting onComplete and onTyping to prevent re-triggering
+  }, [content, isAnimating]);
 
   return <ReactMarkdown>{displayedContent}</ReactMarkdown>;
 };
@@ -99,6 +104,7 @@ function App() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -208,6 +214,7 @@ function App() {
 
       const botMessage: Message = { role: 'model', content: response.data.response, isAnimated: false };
       setMessages(prev => [...prev, botMessage]);
+      setIsAnimating(true);
       
       if (!user) {
         const newCount = guestCount + 1;
@@ -296,7 +303,7 @@ function App() {
           <button className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10">
             <Mic size={20} />
           </button>
-          {isLoading ? (
+          {isLoading || isAnimating ? (
             <button 
               className="flex items-center justify-center transition-all rounded-full bg-white hover:bg-gray-200 text-black w-[36px] h-[36px]" 
               onClick={() => {
@@ -305,6 +312,7 @@ function App() {
                   abortControllerRef.current = null;
                 }
                 setIsLoading(false);
+                setIsAnimating(false);
               }}
               title="Stop generating"
             >
@@ -474,10 +482,16 @@ function App() {
                       msg.isAnimated === false ? (
                         <TypingMessage 
                           content={msg.content} 
+                          isAnimating={isAnimating}
                           onTyping={scrollToBottom}
                           onComplete={() => {
                             setMessages(prev => prev.map((m, i) => i === index ? { ...m, isAnimated: true } : m));
+                            setIsAnimating(false);
                           }} 
+                          onStop={(partial) => {
+                            setMessages(prev => prev.map((m, i) => i === index ? { ...m, isAnimated: true, content: partial } : m));
+                            setIsAnimating(false);
+                          }}
                         />
                       ) : (
                         <ReactMarkdown>{msg.content}</ReactMarkdown>
