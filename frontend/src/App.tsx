@@ -510,8 +510,9 @@ function App() {
                 <>
                   <div className="flex flex-col flex-1 overflow-hidden">
                     <span className="text-sm font-medium text-white truncate leading-tight">{user.name || user.email}</span>
-                    <span className="text-xs text-gray-400 leading-tight">Go</span>
+                    <span className="text-xs text-gray-400 leading-tight text-left">Go</span>
                   </div>
+                  <div className="w-px h-5 bg-white/15 mx-1" />
                   <Store size={18} className="text-gray-400 shrink-0" />
                 </>
               )}
