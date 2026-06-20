@@ -439,7 +439,11 @@ function App() {
                     <div className="avatar user-avatar ml-3">
                       <User size={20} />
                     </div>
-                  ) : null}
+                  ) : (
+                    <div className="avatar bot-avatar mr-4">
+                      <img src="/favicon.svg" alt="Rivo" className="w-8 h-8 drop-shadow-md" />
+                    </div>
+                  )}
                   <div className="message-content">
                     {msg.role === 'user' ? (
                       <p>{msg.content}</p>
