@@ -410,9 +410,7 @@ function App() {
               </button>
             )}
             {user && (
-              <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm cursor-pointer" title={user.email || 'User'}>
-                {user.email ? user.email[0].toUpperCase() : 'U'}
-              </div>
+              <div className="hidden"></div>
             )}
           </div>
         </header>
