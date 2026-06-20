@@ -99,18 +99,9 @@ function App() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('sidebarOpen');
-      if (saved !== null) return saved === 'true';
-      return window.innerWidth >= 768;
-    }
-    return true;
-  });
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  useEffect(() => {
-    localStorage.setItem('sidebarOpen', String(isSidebarOpen));
-  }, [isSidebarOpen]);
+  // We remove the localStorage effect so it doesn't force it open on reload
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [chatHistoryList, setChatHistoryList] = useState<any[]>([]);
   
