@@ -52,7 +52,7 @@ body {
 
 .sidebar {
   width: 280px;
-  background-color: #131314; /* Gemini dark mode sidebar color */
+  background-color: #000000;
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-x: hidden;
   display: flex;
