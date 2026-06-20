@@ -380,7 +380,7 @@ function App() {
           <div className="flex items-center justify-end w-1/4 sm:w-1/3 gap-3">
             {!user && (
               <button 
-                className="text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-4 py-1.5 rounded-full transition-colors hidden sm:block"
+                className="text-sm font-semibold text-black bg-white hover:bg-gray-100 px-5 py-1.5 rounded-full transition-colors hidden sm:block"
                 onClick={() => {
                   setForceSignIn(false);
                   setShowAuthModal(true);
