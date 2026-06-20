@@ -355,11 +355,11 @@ function App() {
     <div className="app-container" onClick={() => setContextMenu(null)}>
       {contextMenu && (
         <div 
-          className="fixed z-[100] bg-[#2f2f2f] border border-white/10 shadow-xl rounded-lg py-1 min-w-[150px]"
+          className="fixed z-[100] bg-[#1e1f20]/90 backdrop-blur-xl border border-white/10 shadow-2xl rounded-xl p-1.5 min-w-[180px] animate-in fade-in zoom-in-95 duration-100"
           style={{ top: contextMenu.y, left: contextMenu.x }}
         >
           <button 
-            className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/5 flex items-center gap-2"
+            className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 rounded-lg flex items-center gap-3 transition-colors font-medium"
             onClick={(e) => {
               e.stopPropagation();
               handleDeleteChat(contextMenu.chatId);
