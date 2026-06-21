@@ -415,7 +415,7 @@ function App() {
 
         <div className="flex items-center w-full">
           <div ref={attachmentMenuRef} className="relative">
-            <input type="file" ref={fileInputRef} hidden multiple accept="image/*,application/pdf" onChange={handleFileChange} />
+            <input type="file" ref={fileInputRef} hidden multiple accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif,application/pdf,.pdf" onChange={handleFileChange} />
             <button 
               onClick={() => setIsAttachmentMenuOpen(!isAttachmentMenuOpen)}
               className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10 shrink-0"
