@@ -381,14 +381,16 @@ function App() {
 
   const renderInput = (isCentered = false) => (
     <div className={`flex flex-col w-full transition-all duration-300 ${isCentered ? 'max-w-[800px]' : 'max-w-3xl mx-auto'}`}>
-      <div className={`flex flex-col bg-[#1e1f20]/80 backdrop-blur-xl border border-white/10 shadow-2xl transition-all duration-300 ${attachments.length > 0 ? 'rounded-[28px] p-4' : 'rounded-full px-4 py-2'} w-full`}>
+      <div className={`flex flex-col bg-[#1e1f20] border border-white/10 shadow-2xl transition-all duration-300 ${attachments.length > 0 ? 'rounded-3xl p-4' : 'rounded-full px-4 py-2'} w-full`}>
         
         {attachments.length > 0 && (
           <div className="flex gap-3 mb-3 flex-wrap">
-            {attachments.map((att, i) => (
+            {attachments.map((att, i) => {
+              const isPdf = att.file.name.toLowerCase().endsWith('.pdf') || att.mimeType === 'application/pdf' || att.file.type === 'application/pdf';
+              return (
               <div key={i} className="relative group animate-in fade-in zoom-in-95 duration-200">
-                {att.file.type === 'application/pdf' ? (
-                  <div className="w-[100px] h-[100px] flex flex-col items-start justify-start bg-[#2a2a2a] rounded-2xl shadow-lg p-3 overflow-hidden cursor-pointer hover:bg-[#333] transition-colors">
+                {isPdf ? (
+                  <div className="w-[100px] h-[100px] flex flex-col items-start justify-start bg-[#2a2a2a] rounded-2xl shadow-lg p-3 overflow-hidden hover:bg-[#333] transition-colors">
                     <div className="bg-[#ea4335] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-[4px] mb-2 shadow-sm">PDF</div>
                     <span className="text-[11px] text-gray-200 font-medium break-all line-clamp-3 leading-snug">{att.file.name}</span>
                   </div>
@@ -407,7 +409,7 @@ function App() {
                   <X size={14} />
                 </button>
               </div>
-            ))}
+            )})}
           </div>
         )}
 
