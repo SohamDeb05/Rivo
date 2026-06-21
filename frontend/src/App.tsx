@@ -459,13 +459,13 @@ function App() {
                   if (abortControllerRef.current) {
                     abortControllerRef.current.abort();
                     abortControllerRef.current = null;
-                }
-                setIsLoading(false);
-                setIsAnimating(false);
-              }}
-              title="Stop generating"
-            >
-              <Square size={14} fill="currentColor" />
+                  }
+                  setIsLoading(false);
+                  setIsAnimating(false);
+                }}
+                title="Stop generating"
+              >
+                <Square size={14} fill="currentColor" />
             </button>
           ) : (
             <button 
@@ -477,6 +477,7 @@ function App() {
             </button>
           )}
         </div>
+      </div>
       </div>
       <div className="disclaimer-text">
         Rivo can make mistakes. Consider verifying important information.
