@@ -132,7 +132,7 @@ app.post('/api/chat', async (req, res) => {
     // Add user message to document
     chatDoc.messages.push({ role: 'user', content: userMessageContent });
 
-    const modelName = (files && files.length > 0) ? "gemini-1.5-flash" : "gemini-flash-lite-latest";
+    const modelName = (files && files.length > 0) ? "gemini-1.5-pro" : "gemini-flash-lite-latest";
     const model = genAI.getGenerativeModel({ 
       model: modelName,
       systemInstruction: "You are a helpful AI assistant named Rivo. Your name is Rivo. Always introduce yourself as Rivo if asked. If the user asks you to create, generate, or draw an image, you MUST respond by generating an image url using the pollinations.ai service. Output the following exact markdown format: `![A highly detailed descriptive prompt](https://image.pollinations.ai/prompt/A%20highly%20detailed%20descriptive%20prompt%20with%20URL%20encoding)`. Make sure to URL-encode the prompt in the URL. Be highly descriptive in the prompt to ensure a high quality image. Do not apologize or say you cannot generate images."
