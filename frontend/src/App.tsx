@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Plus, Send, User, Sparkles, PanelLeft, SquarePen, Search, Store, Menu, Image as ImageIcon, Mic, MessageSquare, Settings, HelpCircle, History, Square, Trash, LogOut, Paperclip, Triangle, MoreHorizontal, ImagePlus } from 'lucide-react';
+import { Plus, Send, User, Sparkles, PanelLeft, SquarePen, Search, Store, Menu, Image as ImageIcon, Mic, MessageSquare, Settings, HelpCircle, History, Square, Trash, LogOut, Paperclip, Triangle, MoreHorizontal, ImagePlus, X, File as FileIcon } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import axios from 'axios';
 import { LiquidButton } from '@/components/ui/liquid-glass-button';
@@ -11,6 +11,13 @@ interface Message {
   role: 'user' | 'model';
   content: string;
   isAnimated?: boolean;
+}
+
+interface Attachment {
+  file: File;
+  base64: string;
+  mimeType: string;
+  previewUrl?: string;
 }
 
 const TypingMessage = ({ content, isAnimating, onComplete, onTyping, onStop }: { content: string, isAnimating?: boolean, onComplete?: () => void, onTyping?: () => void, onStop?: (partialContent: string) => void }) => {
@@ -112,6 +119,9 @@ function App() {
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const [isAttachmentMenuOpen, setIsAttachmentMenuOpen] = useState(false);
   const attachmentMenuRef = useRef<HTMLDivElement>(null);
+  
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -152,6 +162,30 @@ function App() {
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64Data = (reader.result as string).split(',')[1];
+        const previewUrl = file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined;
+        setAttachments(prev => [...prev, {
+          file,
+          base64: base64Data,
+          mimeType: file.type,
+          previewUrl
+        }]);
+      };
+      reader.readAsDataURL(file);
+    });
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    setIsAttachmentMenuOpen(false);
+  };
+  
+  const removeAttachment = (index: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  };
 
   const fetchChats = async (uid?: string) => {
     try {
@@ -250,7 +284,8 @@ function App() {
       const response = await axios.post(`${apiUrl}/api/chat`, {
         message: textToSend,
         chatId: currentChatId,
-        userId: currentUserId
+        userId: currentUserId,
+        files: attachments.map(a => ({ data: a.base64, mimeType: a.mimeType }))
       }, {
         signal: abortControllerRef.current.signal
       });
@@ -258,6 +293,7 @@ function App() {
       const botMessage: Message = { role: 'model', content: response.data.response, isAnimated: false };
       setMessages(prev => [...prev, botMessage]);
       setIsAnimating(true);
+      setAttachments([]);
       
       if (!user) {
         const newCount = guestCount + 1;
@@ -345,8 +381,30 @@ function App() {
 
   const renderInput = (isCentered = false) => (
     <div className={`flex flex-col w-full transition-all duration-300 ${isCentered ? 'max-w-[800px]' : 'max-w-3xl mx-auto'}`}>
+      {attachments.length > 0 && (
+        <div className="flex gap-2 mb-2 px-6 flex-wrap">
+          {attachments.map((att, i) => (
+            <div key={i} className="relative group animate-in fade-in zoom-in-95 duration-200">
+              {att.previewUrl ? (
+                <img src={att.previewUrl} alt="attachment" className="w-14 h-14 object-cover rounded-xl border border-white/20 shadow-lg" />
+              ) : (
+                <div className="w-14 h-14 flex items-center justify-center bg-[#2f2f2f] rounded-xl border border-white/20 shadow-lg">
+                  <FileIcon size={24} className="text-gray-400" />
+                </div>
+              )}
+              <button 
+                onClick={() => removeAttachment(i)}
+                className="absolute -top-2 -right-2 bg-[#2f2f2f] text-white rounded-full p-1 border border-white/20 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500"
+              >
+                <X size={12} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="flex items-center bg-[#1e1f20]/80 backdrop-blur-xl border border-white/10 shadow-2xl rounded-full px-4 py-2 w-full transition-all duration-300">
         <div ref={attachmentMenuRef} className="relative">
+          <input type="file" ref={fileInputRef} hidden multiple accept="image/*,application/pdf" onChange={handleFileChange} />
           <button 
             onClick={() => setIsAttachmentMenuOpen(!isAttachmentMenuOpen)}
             className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10 shrink-0"
@@ -356,7 +414,7 @@ function App() {
           
           {isAttachmentMenuOpen && (
             <div className="absolute bottom-full left-0 mb-3 bg-[#2f2f2f] border border-white/10 rounded-2xl shadow-2xl p-2 z-50 w-64 animate-in fade-in zoom-in-95 duration-100 origin-bottom-left">
-              <button className="flex items-center w-full gap-3 px-3 py-2.5 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors font-medium">
+              <button onClick={() => fileInputRef.current?.click()} className="flex items-center w-full gap-3 px-3 py-2.5 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors font-medium">
                 <Paperclip size={18} className="shrink-0" /> Upload files
               </button>
               

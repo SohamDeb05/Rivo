@@ -86,7 +86,7 @@ app.delete('/api/chats/:id', async (req, res) => {
 
 app.post('/api/chat', async (req, res) => {
   try {
-    const { message, chatId, userId } = req.body;
+    const { message, chatId, userId, files } = req.body;
 
     if (!message) {
       return res.status(400).json({ error: 'Message is required' });
@@ -113,11 +113,28 @@ app.post('/api/chat', async (req, res) => {
       isNewChat = true;
     }
 
-    // Add user message to document
-    chatDoc.messages.push({ role: 'user', content: message });
+    // Prepare message parts
+    let userMessageContent = message;
+    let parts = [{ text: message }];
 
+    if (files && files.length > 0) {
+      userMessageContent += '\n[File(s) Attached]';
+      files.forEach(f => {
+        parts.push({
+          inlineData: {
+            data: f.data,
+            mimeType: f.mimeType
+          }
+        });
+      });
+    }
+
+    // Add user message to document
+    chatDoc.messages.push({ role: 'user', content: userMessageContent });
+
+    const modelName = (files && files.length > 0) ? "gemini-1.5-flash" : "gemini-flash-lite-latest";
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-flash-lite-latest",
+      model: modelName,
       systemInstruction: "You are a helpful AI assistant named Rivo. Your name is Rivo. Always introduce yourself as Rivo if asked. If the user asks you to create, generate, or draw an image, you MUST respond by generating an image url using the pollinations.ai service. Output the following exact markdown format: `![A highly detailed descriptive prompt](https://image.pollinations.ai/prompt/A%20highly%20detailed%20descriptive%20prompt%20with%20URL%20encoding)`. Make sure to URL-encode the prompt in the URL. Be highly descriptive in the prompt to ensure a high quality image. Do not apologize or say you cannot generate images."
     });
 
@@ -142,7 +159,7 @@ app.post('/api/chat', async (req, res) => {
     
     while (retries > 0) {
       try {
-        const result = await chat.sendMessage(message);
+        const result = await chat.sendMessage(parts);
         const response = await result.response;
         text = response.text();
         break; // Success!
