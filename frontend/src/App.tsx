@@ -381,73 +381,82 @@ function App() {
 
   const renderInput = (isCentered = false) => (
     <div className={`flex flex-col w-full transition-all duration-300 ${isCentered ? 'max-w-[800px]' : 'max-w-3xl mx-auto'}`}>
-      {attachments.length > 0 && (
-        <div className="flex gap-2 mb-2 px-6 flex-wrap">
-          {attachments.map((att, i) => (
-            <div key={i} className="relative group animate-in fade-in zoom-in-95 duration-200">
-              {att.previewUrl ? (
-                <img src={att.previewUrl} alt="attachment" className="w-14 h-14 object-cover rounded-xl border border-white/20 shadow-lg" />
-              ) : (
-                <div className="w-14 h-14 flex items-center justify-center bg-[#2f2f2f] rounded-xl border border-white/20 shadow-lg">
-                  <FileIcon size={24} className="text-gray-400" />
-                </div>
-              )}
-              <button 
-                onClick={() => removeAttachment(i)}
-                className="absolute -top-2 -right-2 bg-[#2f2f2f] text-white rounded-full p-1 border border-white/20 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500"
-              >
-                <X size={12} />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-      <div className="flex items-center bg-[#1e1f20]/80 backdrop-blur-xl border border-white/10 shadow-2xl rounded-full px-4 py-2 w-full transition-all duration-300">
-        <div ref={attachmentMenuRef} className="relative">
-          <input type="file" ref={fileInputRef} hidden multiple accept="image/*,application/pdf" onChange={handleFileChange} />
-          <button 
-            onClick={() => setIsAttachmentMenuOpen(!isAttachmentMenuOpen)}
-            className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10 shrink-0"
-          >
-            <Plus size={22} />
-          </button>
-          
-          {isAttachmentMenuOpen && (
-            <div className="absolute bottom-full left-0 mb-3 bg-[#2f2f2f] border border-white/10 rounded-2xl shadow-2xl p-2 z-50 w-64 animate-in fade-in zoom-in-95 duration-100 origin-bottom-left">
-              <button onClick={() => fileInputRef.current?.click()} className="flex items-center w-full gap-3 px-3 py-2.5 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors font-medium">
-                <Paperclip size={18} className="shrink-0" /> Upload files
-              </button>
-              
-              <div className="h-px bg-white/10 my-1.5 mx-2" />
-              
-              <button className="flex items-center justify-between w-full gap-3 px-3 py-2.5 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors font-medium">
-                <div className="flex items-center gap-3">
-                  <ImagePlus size={18} className="shrink-0" /> Create image
-                </div>
-                <span className="bg-white/10 px-2 py-0.5 rounded-full text-xs text-white">New</span>
-              </button>
-            </div>
-          )}
-        </div>
-        <input
-          type="text"
-          className={`flex-1 bg-transparent border-none outline-none text-gray-200 px-3 placeholder-gray-500 w-full ${isCentered ? 'text-lg' : 'text-base'}`}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Ask anything"
-        />
-        <div className="flex items-center shrink-0 gap-1">
-          <button className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10">
-            <Mic size={20} />
-          </button>
-          {isLoading || isAnimating ? (
+      <div className={`flex flex-col bg-[#1e1f20]/80 backdrop-blur-xl border border-white/10 shadow-2xl transition-all duration-300 ${attachments.length > 0 ? 'rounded-[28px] p-4' : 'rounded-full px-4 py-2'} w-full`}>
+        
+        {attachments.length > 0 && (
+          <div className="flex gap-3 mb-3 flex-wrap">
+            {attachments.map((att, i) => (
+              <div key={i} className="relative group animate-in fade-in zoom-in-95 duration-200">
+                {att.file.type === 'application/pdf' ? (
+                  <div className="w-[100px] h-[100px] flex flex-col items-start justify-start bg-[#2a2a2a] rounded-2xl shadow-lg p-3 overflow-hidden cursor-pointer hover:bg-[#333] transition-colors">
+                    <div className="bg-[#ea4335] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-[4px] mb-2 shadow-sm">PDF</div>
+                    <span className="text-[11px] text-gray-200 font-medium break-all line-clamp-3 leading-snug">{att.file.name}</span>
+                  </div>
+                ) : att.previewUrl ? (
+                  <img src={att.previewUrl} alt="attachment" className="w-[100px] h-[100px] object-cover rounded-2xl shadow-lg hover:brightness-110 transition-all cursor-pointer" />
+                ) : (
+                  <div className="w-[100px] h-[100px] flex flex-col items-center justify-center bg-[#2a2a2a] rounded-2xl shadow-lg p-3 overflow-hidden hover:bg-[#333] transition-colors cursor-pointer">
+                    <FileIcon size={28} className="text-gray-400 mb-2" />
+                    <span className="text-[10px] text-gray-400 truncate w-full text-center">{att.file.name}</span>
+                  </div>
+                )}
+                <button 
+                  onClick={() => removeAttachment(i)}
+                  className="absolute -top-2 -right-2 bg-[#1e1f20] text-gray-300 rounded-full p-1.5 border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 hover:text-white shadow-xl"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="flex items-center w-full">
+          <div ref={attachmentMenuRef} className="relative">
+            <input type="file" ref={fileInputRef} hidden multiple accept="image/*,application/pdf" onChange={handleFileChange} />
             <button 
-              className="flex items-center justify-center transition-all rounded-full bg-white hover:bg-gray-200 text-black w-[36px] h-[36px]" 
-              onClick={() => {
-                if (abortControllerRef.current) {
-                  abortControllerRef.current.abort();
-                  abortControllerRef.current = null;
+              onClick={() => setIsAttachmentMenuOpen(!isAttachmentMenuOpen)}
+              className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10 shrink-0"
+            >
+              <Plus size={22} />
+            </button>
+            
+            {isAttachmentMenuOpen && (
+              <div className="absolute bottom-full left-0 mb-3 bg-[#2f2f2f] border border-white/10 rounded-2xl shadow-2xl p-2 z-50 w-64 animate-in fade-in zoom-in-95 duration-100 origin-bottom-left">
+                <button onClick={() => fileInputRef.current?.click()} className="flex items-center w-full gap-3 px-3 py-2.5 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors font-medium">
+                  <Paperclip size={18} className="shrink-0" /> Upload files
+                </button>
+                
+                <div className="h-px bg-white/10 my-1.5 mx-2" />
+                
+                <button className="flex items-center justify-between w-full gap-3 px-3 py-2.5 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors font-medium">
+                  <div className="flex items-center gap-3">
+                    <ImagePlus size={18} className="shrink-0" /> Create image
+                  </div>
+                  <span className="bg-white/10 px-2 py-0.5 rounded-full text-xs text-white">New</span>
+                </button>
+              </div>
+            )}
+          </div>
+          <input
+            type="text"
+            className={`flex-1 bg-transparent border-none outline-none text-gray-200 px-3 placeholder-gray-500 w-full ${isCentered ? 'text-lg' : 'text-base'}`}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Ask anything"
+          />
+          <div className="flex items-center shrink-0 gap-1">
+            <button className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10">
+              <Mic size={20} />
+            </button>
+            {isLoading || isAnimating ? (
+              <button 
+                className="flex items-center justify-center transition-all rounded-full bg-white hover:bg-gray-200 text-black w-[36px] h-[36px]" 
+                onClick={() => {
+                  if (abortControllerRef.current) {
+                    abortControllerRef.current.abort();
+                    abortControllerRef.current = null;
                 }
                 setIsLoading(false);
                 setIsAnimating(false);
