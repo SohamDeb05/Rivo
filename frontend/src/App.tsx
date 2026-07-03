@@ -741,9 +741,9 @@ function App() {
                       <img src="/favicon.svg" alt="Rivo" className="w-7 h-7 opacity-90 scale-110" />
                     </div>
                   )}
-                  <div className="flex flex-col gap-2 max-w-[85%]">
+                  <div className={`flex flex-col gap-2 w-full ${msg.role === 'user' ? 'max-w-[75%] items-end' : 'max-w-[85%] items-start'}`}>
                     {msg.role === 'user' && msg.attachments && msg.attachments.length > 0 && (
-                      <div className="flex flex-col items-end gap-2 mb-1 w-full">
+                      <div className="flex flex-col items-end gap-2 w-full">
                         {msg.attachments.map((att, i) => {
                            const isImage = att.mimeType?.startsWith('image/');
                            return isImage ? (
