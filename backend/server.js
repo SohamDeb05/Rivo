@@ -85,6 +85,25 @@ app.delete('/api/chats/:id', async (req, res) => {
   }
 });
 
+// Serve attachments as raw media (useful for external APIs that need an image URL)
+app.get('/api/media/:chatId/:messageIndex/:attachmentIndex', async (req, res) => {
+  try {
+    const { chatId, messageIndex, attachmentIndex } = req.params;
+    const chat = await Chat.findById(chatId);
+    if (!chat || !chat.messages[messageIndex]) return res.status(404).send('Not found');
+    
+    const attachment = chat.messages[messageIndex].attachments?.[attachmentIndex];
+    if (!attachment) return res.status(404).send('Attachment not found');
+
+    const imgBuffer = Buffer.from(attachment.data, 'base64');
+    res.set('Content-Type', attachment.mimeType);
+    res.send(imgBuffer);
+  } catch (error) {
+    console.error('Error serving media:', error);
+    res.status(500).send('Internal server error');
+  }
+});
+
 app.post('/api/chat', async (req, res) => {
   try {
     const { message, chatId, userId, files } = req.body;
@@ -137,11 +156,23 @@ app.post('/api/chat', async (req, res) => {
       attachments: files && files.length > 0 ? files.map(f => ({ data: f.data, mimeType: f.mimeType })) : undefined
     });
 
-    // Smart Intent Detection: Is this an image generation request?
-    const intentPrompt = `Does this user request explicitly ask to generate, draw, make, create, or edit an image/picture/logo/art? Respond with exactly "YES" or "NO". Request: "${message}"`;
+    // Smart Intent Detection: Generate, Edit, or Text Chat
+    const hasImage = files && files.length > 0;
+    const intentPrompt = `Does this user request ask to generate a new image, OR edit/modify an existing image?
+Respond with exactly "GENERATE" if they want a new image.
+Respond with exactly "EDIT" if they want to modify/edit an image.
+Respond with exactly "NO" if it's just a normal text chat.
+Request: "${message}"
+Has Uploaded Image: ${hasImage ? "YES" : "NO"}
+`;
     const intentModel = genAI.getGenerativeModel({ model: "gemini-flash-lite-latest" });
     const intentResult = await intentModel.generateContent(intentPrompt);
-    const isImageRequest = intentResult.response.text().trim().toUpperCase().includes('YES');
+    const intentStr = intentResult.response.text().trim().toUpperCase();
+    
+    // If they ask to edit but didn't upload an image, treat it as GENERATE
+    const imageMode = intentStr.includes('EDIT') ? (hasImage ? 'EDIT' : 'GENERATE') 
+                    : intentStr.includes('GENERATE') ? 'GENERATE' 
+                    : 'NO';
 
     let titlePromise = null;
     if (isNewChat) {
@@ -151,21 +182,33 @@ app.post('/api/chat', async (req, res) => {
 
     let text = "";
 
-    if (isImageRequest) {
+    if (imageMode !== 'NO') {
       try {
-        const { enhanceImagePrompt } = require('./dist/image-engine/imagePromptEnhancer');
-        const { generateImage } = require('./dist/image-engine/imageGenerator');
+        const { processImageRequest } = require('./dist/image-engine/imageRouter');
         
-        const enhancedRes = await enhanceImagePrompt(message);
-        if (enhancedRes.success) {
-          const imageUrl = await generateImage(enhancedRes.enhancedPrompt);
-          text = `Done! Your image is ready.\n\n![Generated Image](${imageUrl})`;
+        let referenceImageUrl = undefined;
+        if (imageMode === 'EDIT') {
+           const attachmentIndex = chatDoc.messages[chatDoc.messages.length - 1].attachments.findIndex(a => a.mimeType.startsWith('image/'));
+           if (attachmentIndex !== -1) {
+             const protocol = req.protocol === 'http' && req.get('host').includes('localhost') ? 'http' : 'https';
+             referenceImageUrl = `${protocol}://${req.get('host')}/api/media/${chatDoc._id}/${chatDoc.messages.length - 1}/${attachmentIndex}`;
+           }
+        }
+
+        const engineResult = await processImageRequest({
+           prompt: message,
+           mode: imageMode,
+           referenceImageUrl
+        });
+        
+        if (engineResult.success) {
+          text = `Done! Your image is ready.\n\n![Generated Image](${engineResult.imageUrl})`;
         } else {
-          text = `I'm sorry, I couldn't generate that image. ${enhancedRes.error || ""}`;
+          text = `I'm sorry, I couldn't process your request. ${engineResult.error || ""}`;
         }
       } catch (err) {
-        console.error("Error in image generation module:", err);
-        text = "I'm sorry, I encountered an internal error while generating your image.";
+        console.error("Error in image processing module:", err);
+        text = "I'm sorry, I encountered an internal error while processing your image.";
       }
     } else {
       // Standard text chat
