@@ -11,6 +11,7 @@ interface Message {
   role: 'user' | 'model';
   content: string;
   isAnimated?: boolean;
+  attachments?: { data: string, mimeType: string }[];
 }
 
 interface Attachment {
@@ -271,7 +272,12 @@ function App() {
       Notification.requestPermission();
     }
 
-    const userMessage: Message = { role: 'user', content: textToSend };
+    const formattedAttachments = attachments.length > 0 ? attachments.map(a => ({ data: a.base64, mimeType: a.mimeType })) : undefined;
+    const userMessage: Message = { 
+      role: 'user', 
+      content: textToSend + (attachments.length > 0 ? '\n[File(s) Attached]' : ''),
+      attachments: formattedAttachments
+    };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
@@ -732,12 +738,26 @@ function App() {
                       <img src="/favicon.svg" alt="Rivo" className="w-7 h-7 opacity-90 scale-110" />
                     </div>
                   )}
-                  <div className="message-content">
-                    {msg.role === 'user' ? (
-                      <div className="flex flex-col gap-3">
-                        {/* Attempt to parse attachments if they are encoded in the message content, or just display the message if not possible to reliably parse from plain string without adding complexity. Since we only send base64 to backend, the frontend doesn't easily store the attachment history in the messages state unless we change the Message interface. Let's look at the current implementation: the backend adds \n[File(s) Attached] to the content. Let's just render the text for now, but style it nicely. */}
+                  <div className="flex flex-col gap-2 max-w-[85%]">
+                    {msg.role === 'user' && msg.attachments && msg.attachments.length > 0 && (
+                      <div className="flex flex-col items-end gap-2 mb-1 w-full">
+                        {msg.attachments.map((att, i) => {
+                           const isImage = att.mimeType?.startsWith('image/');
+                           return isImage ? (
+                             <img key={i} src={`data:${att.mimeType};base64,${att.data}`} alt="attachment" className="max-w-[280px] sm:max-w-sm max-h-[400px] object-cover rounded-3xl shadow-lg border border-white/10" />
+                           ) : (
+                             <div key={i} className="w-[120px] h-[120px] flex flex-col items-start justify-start bg-[#2a2a2a] rounded-2xl shadow-lg p-3 overflow-hidden border border-white/10">
+                               <div className="bg-[#ea4335] text-white text-[10px] font-bold px-2 py-0.5 rounded-[6px] mb-2 shadow-sm">PDF</div>
+                               <span className="text-[11px] text-gray-300 font-medium break-all line-clamp-3 leading-tight">Attached Document</span>
+                             </div>
+                           )
+                        })}
+                      </div>
+                    )}
+                    <div className="message-content">
+                      {msg.role === 'user' ? (
                         <div className="flex flex-col gap-2">
-                            {msg.content.includes('[File(s) Attached]') && (
+                            {msg.content.includes('[File(s) Attached]') && (!msg.attachments || msg.attachments.length === 0) && (
                                 <div className="flex flex-wrap gap-2 mb-2">
                                     <div className="w-[80px] h-[80px] flex flex-col items-start justify-start bg-[#2a2a2a] rounded-xl shadow-lg p-2 overflow-hidden border border-white/10">
                                       <div className="bg-[#ea4335] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-[4px] mb-1.5 shadow-sm">FILE</div>
@@ -745,10 +765,9 @@ function App() {
                                     </div>
                                 </div>
                             )}
-                            <p>{msg.content.replace('\n[File(s) Attached]', '')}</p>
+                            <p className="whitespace-pre-wrap">{msg.content.replace('\n[File(s) Attached]', '')}</p>
                         </div>
-                      </div>
-                    ) : (
+                      ) : (
                       msg.isAnimated === false ? (
                         <TypingMessage 
                           content={msg.content} 
@@ -767,6 +786,7 @@ function App() {
                         <ReactMarkdown>{msg.content}</ReactMarkdown>
                       )
                     )}
+                  </div>
                   </div>
                 </div>
               ))}

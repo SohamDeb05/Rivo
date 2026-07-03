@@ -131,7 +131,11 @@ app.post('/api/chat', async (req, res) => {
     }
 
     // Add user message to document
-    chatDoc.messages.push({ role: 'user', content: userMessageContent });
+    chatDoc.messages.push({ 
+      role: 'user', 
+      content: userMessageContent,
+      attachments: files && files.length > 0 ? files.map(f => ({ data: f.data, mimeType: f.mimeType })) : undefined
+    });
 
     // Smart Intent Detection: Is this an image generation request?
     const intentPrompt = `Does this user request explicitly ask to generate, draw, make, create, or edit an image/picture/logo/art? Respond with exactly "YES" or "NO". Request: "${message}"`;

@@ -9,7 +9,11 @@ const messageSchema = new mongoose.Schema({
   content: {
     type: String,
     required: true
-  }
+  },
+  attachments: [{
+    data: String,
+    mimeType: String
+  }]
 });
 
 const chatSchema = new mongoose.Schema({
