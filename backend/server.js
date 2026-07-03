@@ -133,43 +133,62 @@ app.post('/api/chat', async (req, res) => {
     // Add user message to document
     chatDoc.messages.push({ role: 'user', content: userMessageContent });
 
-    const modelName = (files && files.length > 0) ? "gemini-flash-latest" : "gemini-flash-lite-latest";
-    const model = genAI.getGenerativeModel({ 
-      model: modelName,
-      systemInstruction: "You are a helpful AI assistant named Rivo. Your name is Rivo. Always introduce yourself as Rivo if asked. If the user asks you to create, generate, or draw an image, you MUST respond by generating an image url using the pollinations.ai service. Output the following exact markdown format: `![A highly detailed descriptive prompt](https://image.pollinations.ai/prompt/A%20highly%20detailed%20descriptive%20prompt%20with%20URL%20encoding)`. Make sure to URL-encode the prompt in the URL. Be highly descriptive in the prompt to ensure a high quality image. Do not apologize or say you cannot generate images."
-    });
+    // Smart Intent Detection: Is this an image generation request?
+    const intentPrompt = `Does this user request explicitly ask to generate, draw, make, create, or edit an image/picture/logo/art? Respond with exactly "YES" or "NO". Request: "${message}"`;
+    const intentModel = genAI.getGenerativeModel({ model: "gemini-flash-lite-latest" });
+    const intentResult = await intentModel.generateContent(intentPrompt);
+    const isImageRequest = intentResult.response.text().trim().toUpperCase().includes('YES');
 
-    // Format history for Gemini API based on DB messages (excluding the one we just added)
-    const formattedHistory = chatDoc.messages.slice(0, -1).map(msg => ({
-      role: msg.role === 'user' ? 'user' : 'model',
-      parts: [{ text: msg.content }],
-    }));
-
-    const chat = model.startChat({
-      history: formattedHistory,
-    });
-
-    let titlePromise = null;
-    if (isNewChat) {
-      const titleModel = genAI.getGenerativeModel({ model: "gemini-flash-lite-latest" });
-      titlePromise = titleModel.generateContent(`Generate a highly concise 2 to 4 word title for this prompt. Do not use quotes or punctuation: "${message}"`);
-    }
-
-    let retries = 3;
     let text = "";
-    
-    while (retries > 0) {
+
+    if (isImageRequest) {
       try {
-        const result = await chat.sendMessage(parts);
-        const response = await result.response;
-        text = response.text();
-        break; // Success!
-      } catch (err) {
-        if (err.status === 503 && retries > 1) {
-          retries--;
-          await new Promise(r => setTimeout(r, 1000));
+        const { enhanceImagePrompt } = require('./dist/image-engine/imagePromptEnhancer');
+        const { generateImage } = require('./dist/image-engine/imageGenerator');
+        
+        const enhancedRes = await enhanceImagePrompt(message);
+        if (enhancedRes.success) {
+          const imageUrl = await generateImage(enhancedRes.enhancedPrompt);
+          text = `Done! Your image is ready.\n\n![Generated Image](${imageUrl})`;
         } else {
-          throw err;
+          text = `I'm sorry, I couldn't generate that image. ${enhancedRes.error || ""}`;
+        }
+      } catch (err) {
+        console.error("Error in image generation module:", err);
+        text = "I'm sorry, I encountered an internal error while generating your image.";
+      }
+    } else {
+      // Standard text chat
+      const modelName = (files && files.length > 0) ? "gemini-flash-latest" : "gemini-flash-lite-latest";
+      const model = genAI.getGenerativeModel({ 
+        model: modelName,
+        systemInstruction: "You are a helpful AI assistant named Rivo. Your name is Rivo. Always introduce yourself as Rivo if asked."
+      });
+
+      // Format history for Gemini API based on DB messages (excluding the one we just added)
+      const formattedHistory = chatDoc.messages.slice(0, -1).map(msg => ({
+        role: msg.role === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.content }],
+      }));
+
+      const chat = model.startChat({
+        history: formattedHistory,
+      });
+      
+      let retries = 3;
+      while (retries > 0) {
+        try {
+          const result = await chat.sendMessage(parts);
+          const response = await result.response;
+          text = response.text();
+          break; // Success!
+        } catch (err) {
+          if (err.status === 503 && retries > 1) {
+            retries--;
+            await new Promise(r => setTimeout(r, 1000));
+          } else {
+            throw err;
+          }
         }
       }
     }
