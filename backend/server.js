@@ -139,6 +139,12 @@ app.post('/api/chat', async (req, res) => {
     const intentResult = await intentModel.generateContent(intentPrompt);
     const isImageRequest = intentResult.response.text().trim().toUpperCase().includes('YES');
 
+    let titlePromise = null;
+    if (isNewChat) {
+      const titleModel = genAI.getGenerativeModel({ model: "gemini-flash-lite-latest" });
+      titlePromise = titleModel.generateContent(`Generate a highly concise 2 to 4 word title for this prompt. Do not use quotes or punctuation: "${message}"`);
+    }
+
     let text = "";
 
     if (isImageRequest) {
