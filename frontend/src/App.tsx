@@ -711,7 +711,20 @@ function App() {
                   )}
                   <div className="message-content">
                     {msg.role === 'user' ? (
-                      <p>{msg.content}</p>
+                      <div className="flex flex-col gap-3">
+                        {/* Attempt to parse attachments if they are encoded in the message content, or just display the message if not possible to reliably parse from plain string without adding complexity. Since we only send base64 to backend, the frontend doesn't easily store the attachment history in the messages state unless we change the Message interface. Let's look at the current implementation: the backend adds \n[File(s) Attached] to the content. Let's just render the text for now, but style it nicely. */}
+                        <div className="flex flex-col gap-2">
+                            {msg.content.includes('[File(s) Attached]') && (
+                                <div className="flex flex-wrap gap-2 mb-2">
+                                    <div className="w-[80px] h-[80px] flex flex-col items-start justify-start bg-[#2a2a2a] rounded-xl shadow-lg p-2 overflow-hidden border border-white/10">
+                                      <div className="bg-[#ea4335] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-[4px] mb-1.5 shadow-sm">FILE</div>
+                                      <span className="text-[10px] text-gray-300 font-medium break-all line-clamp-3 leading-tight">Attached</span>
+                                    </div>
+                                </div>
+                            )}
+                            <p>{msg.content.replace('\n[File(s) Attached]', '')}</p>
+                        </div>
+                      </div>
                     ) : (
                       msg.isAnimated === false ? (
                         <TypingMessage 
