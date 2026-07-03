@@ -378,42 +378,72 @@ function App() {
   const handleSuggestionClick = (text: string) => {
     executeSend(text);
   };
+  
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (input === '' && textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
+  }, [input]);
 
   const renderInput = (isCentered = false) => (
     <div className={`flex flex-col w-full transition-all duration-300 ${isCentered ? 'max-w-[800px]' : 'max-w-3xl mx-auto'}`}>
-      <div className={`flex flex-col bg-[#1e1f20] border border-white/10 shadow-2xl transition-all duration-300 ${attachments.length > 0 ? 'rounded-3xl p-4' : 'rounded-full px-4 py-2'} w-full`}>
+      <div className={`flex flex-col bg-[#1e1f20] border border-white/10 shadow-2xl transition-all duration-300 rounded-[28px] p-3 w-full`}>
         
         {attachments.length > 0 && (
-          <div className="flex gap-3 mb-3 flex-wrap">
+          <div className="flex gap-3 mb-2 flex-wrap px-2 pt-1">
             {attachments.map((att, i) => {
               const isPdf = att.file.name.toLowerCase().endsWith('.pdf') || att.mimeType === 'application/pdf' || att.file.type === 'application/pdf';
               return (
               <div key={i} className="relative group animate-in fade-in zoom-in-95 duration-200">
                 {isPdf ? (
-                  <div className="w-[100px] h-[100px] flex flex-col items-start justify-start bg-[#2a2a2a] rounded-2xl shadow-lg p-3 overflow-hidden hover:bg-[#333] transition-colors">
-                    <div className="bg-[#ea4335] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-[4px] mb-2 shadow-sm">PDF</div>
-                    <span className="text-[11px] text-gray-200 font-medium break-all line-clamp-3 leading-snug">{att.file.name}</span>
+                  <div className="w-[80px] h-[80px] flex flex-col items-start justify-start bg-[#2a2a2a] rounded-2xl shadow-lg p-3 overflow-hidden hover:bg-[#333] transition-colors">
+                    <div className="bg-[#ea4335] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-[4px] mb-2 shadow-sm">PDF</div>
+                    <span className="text-[10px] text-gray-200 font-medium break-all line-clamp-2 leading-snug">{att.file.name}</span>
                   </div>
                 ) : att.previewUrl ? (
-                  <img src={att.previewUrl} alt="attachment" className="w-[100px] h-[100px] object-cover rounded-2xl shadow-lg hover:brightness-110 transition-all cursor-pointer" />
+                  <img src={att.previewUrl} alt="attachment" className="w-[80px] h-[80px] object-cover rounded-2xl shadow-lg hover:brightness-110 transition-all cursor-pointer" />
                 ) : (
-                  <div className="w-[100px] h-[100px] flex flex-col items-center justify-center bg-[#2a2a2a] rounded-2xl shadow-lg p-3 overflow-hidden hover:bg-[#333] transition-colors cursor-pointer">
-                    <FileIcon size={28} className="text-gray-400 mb-2" />
-                    <span className="text-[10px] text-gray-400 truncate w-full text-center">{att.file.name}</span>
+                  <div className="w-[80px] h-[80px] flex flex-col items-center justify-center bg-[#2a2a2a] rounded-2xl shadow-lg p-2 overflow-hidden hover:bg-[#333] transition-colors cursor-pointer">
+                    <FileIcon size={24} className="text-gray-400 mb-1" />
+                    <span className="text-[9px] text-gray-400 truncate w-full text-center">{att.file.name}</span>
                   </div>
                 )}
                 <button 
                   onClick={() => removeAttachment(i)}
-                  className="absolute -top-2 -right-2 bg-[#1e1f20] text-gray-300 rounded-full p-1.5 border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 hover:text-white shadow-xl"
+                  className="absolute -top-2 -right-2 bg-[#1e1f20] text-gray-300 rounded-full p-1 border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 hover:text-white shadow-xl"
                 >
-                  <X size={14} />
+                  <X size={12} />
                 </button>
               </div>
             )})}
           </div>
         )}
 
-        <div className="flex items-center w-full">
+        <div className="flex px-2 w-full pt-1 pb-2">
+          <textarea
+            ref={textareaRef}
+            className={`flex-1 bg-transparent border-none outline-none text-gray-200 placeholder-gray-500 w-full resize-none min-h-[24px] max-h-[200px] overflow-y-auto custom-scrollbar ${isCentered ? 'text-lg' : 'text-base'}`}
+            value={input}
+            onChange={(e) => {
+               setInput(e.target.value);
+               e.target.style.height = 'auto';
+               e.target.style.height = Math.min(e.target.scrollHeight, 200) + 'px';
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+            placeholder="Ask anything"
+            rows={1}
+            style={{ height: 'auto' }}
+          />
+        </div>
+
+        <div className="flex items-center justify-between w-full mt-1">
           <div ref={attachmentMenuRef} className="relative">
             <input type="file" ref={fileInputRef} hidden multiple accept=".jpg,.jpeg,.png,.pdf" onChange={handleFileChange} />
             <button 
@@ -440,15 +470,8 @@ function App() {
               </div>
             )}
           </div>
-          <input
-            type="text"
-            className={`flex-1 bg-transparent border-none outline-none text-gray-200 px-3 placeholder-gray-500 w-full ${isCentered ? 'text-lg' : 'text-base'}`}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Ask anything"
-          />
-          <div className="flex items-center shrink-0 gap-1">
+          
+          <div className="flex items-center shrink-0 gap-1 pr-1">
             <button className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10">
               <Mic size={20} />
             </button>
@@ -469,15 +492,15 @@ function App() {
             </button>
           ) : (
             <button 
-              className={`flex items-center justify-center transition-all rounded-full ${input.trim() ? 'text-white bg-white/10 hover:bg-white/20' : 'text-gray-600'} w-[36px] h-[36px]`} 
+              className={`flex items-center justify-center transition-all rounded-full ${input.trim() || attachments.length > 0 ? 'text-black bg-white hover:bg-gray-200' : 'text-gray-500 bg-white/10'} w-[36px] h-[36px]`} 
               onClick={handleSend}
-              disabled={!input.trim()}
+              disabled={!input.trim() && attachments.length === 0}
             >
               <Send size={18} className="mr-0.5 mt-0.5" />
             </button>
           )}
+          </div>
         </div>
-      </div>
       </div>
       <div className="disclaimer-text">
         Rivo can make mistakes. Consider verifying important information.
