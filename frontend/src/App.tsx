@@ -296,9 +296,12 @@ function App() {
         signal: abortControllerRef.current.signal
       });
 
-      const botMessage: Message = { role: 'model', content: response.data.response, isAnimated: false };
+      const isImageGen = response.data.response.includes('![Generated Image]');
+      const botMessage: Message = { role: 'model', content: response.data.response, isAnimated: isImageGen };
       setMessages(prev => [...prev, botMessage]);
-      setIsAnimating(true);
+      if (!isImageGen) {
+        setIsAnimating(true);
+      }
       setAttachments([]);
       
       if (!user) {
