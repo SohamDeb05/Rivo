@@ -732,11 +732,7 @@ function App() {
             <div className="chat-container">
               {messages.map((msg, index) => (
                 <div key={index} className={`message ${msg.role === 'user' ? 'user' : 'bot'}`}>
-                  {msg.role === 'user' ? (
-                    <div className="flex-shrink-0 ml-4 w-9 h-9 mt-1 rounded-full bg-black border border-white/20 shadow-sm flex items-center justify-center text-white font-bold text-sm">
-                      {user?.email ? user.email[0].toUpperCase() : <User size={18} className="text-white" />}
-                    </div>
-                  ) : (
+                  {msg.role === 'model' && (
                     <div className="flex-shrink-0 mr-4 w-9 h-9 mt-1 rounded-full bg-white/5 border border-white/10 shadow-sm flex items-center justify-center overflow-hidden">
                       <img src="/favicon.svg" alt="Rivo" className="w-7 h-7 opacity-90 scale-110" />
                     </div>
