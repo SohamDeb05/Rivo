@@ -743,7 +743,7 @@ function App() {
               {messages.map((msg, index) => (
                 <div key={index} className={`message group ${msg.role === 'user' ? 'user' : 'bot'}`}>
                   {msg.role === 'model' && (
-                    <div className="flex-shrink-0 mr-4 w-9 h-9 mt-1 rounded-full bg-white/5 border border-white/10 shadow-sm flex items-center justify-center overflow-hidden">
+                    <div className="flex-shrink-0 w-9 h-9 mt-1 rounded-full bg-white/5 border border-white/10 shadow-sm flex items-center justify-center overflow-hidden">
                       <img src="/favicon.svg" alt="Rivo" className="w-7 h-7 opacity-90 scale-110" />
                     </div>
                   )}
