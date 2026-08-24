@@ -581,7 +581,7 @@ function App() {
                 </button>
               </div>
               
-              <div className="flex-1 overflow-y-auto py-4 px-4">
+              <div className="flex-1 overflow-y-auto py-4 px-4 no-scrollbar">
                 <h3 className="text-xs font-semibold text-gray-500 mb-3 px-2">Recent</h3>
                 {chatHistoryList.map((chat) => (
                   <button 
@@ -737,7 +737,7 @@ function App() {
           </div>
         ) : (
           <>
-            <div className="chat-container">
+            <div className="chat-container no-scrollbar">
               {messages.map((msg, index) => (
                 <div key={index} className={`message ${msg.role === 'user' ? 'user' : 'bot'}`}>
                   {msg.role === 'model' && (
