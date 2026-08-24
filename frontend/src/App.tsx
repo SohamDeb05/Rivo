@@ -560,9 +560,21 @@ function App() {
             </div>
           </div>
         ) : (
-          <div className="p-3 flex items-center justify-center shrink-0">
+          <div className="p-3 flex flex-col items-center shrink-0 gap-3 pt-4">
+            <button onClick={() => setIsSidebarOpen(true)} className="text-white hover:bg-white/10 p-2 rounded-lg transition-colors mb-2">
+              <Sparkles size={24} />
+            </button>
+            
+            <button onClick={() => { handleNewChat(); setIsSidebarOpen(true); }} className="text-gray-400 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors">
+              <SquarePen size={20} />
+            </button>
+            
             <button onClick={() => setIsSidebarOpen(true)} className="text-gray-400 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors">
-              <Menu size={20} />
+              <Search size={20} />
+            </button>
+            
+            <button onClick={() => setIsSidebarOpen(true)} className="text-gray-400 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors">
+              <MessageSquare size={20} />
             </button>
           </div>
         )}
