@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Plus, Send, User, Sparkles, PanelLeft, SquarePen, Search, Store, Menu, Image as ImageIcon, Mic, MessageSquare, Settings, HelpCircle, History, Square, Trash, LogOut, Paperclip, Triangle, MoreHorizontal, ImagePlus, X, File as FileIcon, Copy, ThumbsUp, ThumbsDown, RotateCcw } from 'lucide-react';
+import { Plus, Send, User, Sparkles, PanelLeft, SquarePen, Search, Store, Menu, Image as ImageIcon, Mic, MessageSquare, Settings, HelpCircle, History, Square, Trash, LogOut, Paperclip, Triangle, MoreHorizontal, ImagePlus, X, File as FileIcon, Copy, ThumbsUp, ThumbsDown, RotateCcw, Check } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import axios from 'axios';
 import { LiquidButton } from '@/components/ui/liquid-glass-button';
@@ -131,6 +131,13 @@ function App() {
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const [isAttachmentMenuOpen, setIsAttachmentMenuOpen] = useState(false);
   const attachmentMenuRef = useRef<HTMLDivElement>(null);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+
+  const handleCopy = (text: string, index: number) => {
+    navigator.clipboard.writeText(text);
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
+  };
   
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -792,7 +799,9 @@ function App() {
                     )}
                     {msg.role === 'model' && (
                       <div className="flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 -ml-1">
-                        <button className="text-gray-400 hover:text-gray-200 hover:bg-white/10 p-1.5 rounded-lg transition-colors" title="Copy"><Copy size={16} /></button>
+                        <button onClick={() => handleCopy(msg.content, index)} className="text-gray-400 hover:text-gray-200 hover:bg-white/10 p-1.5 rounded-lg transition-colors" title="Copy">
+                          {copiedIndex === index ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+                        </button>
                         <button className="text-gray-400 hover:text-gray-200 hover:bg-white/10 p-1.5 rounded-lg transition-colors" title="Good response"><ThumbsUp size={16} /></button>
                         <button className="text-gray-400 hover:text-gray-200 hover:bg-white/10 p-1.5 rounded-lg transition-colors" title="Bad response"><ThumbsDown size={16} /></button>
                         <button className="text-gray-400 hover:text-gray-200 hover:bg-white/10 p-1.5 rounded-lg transition-colors" title="Regenerate"><RotateCcw size={16} /></button>
