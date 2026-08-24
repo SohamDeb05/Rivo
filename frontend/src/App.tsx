@@ -486,15 +486,6 @@ function App() {
                 <button onClick={() => fileInputRef.current?.click()} className="flex items-center w-full gap-3 px-3 py-2.5 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors font-medium">
                   <Paperclip size={18} className="shrink-0" /> Upload files
                 </button>
-                
-                <div className="h-px bg-white/10 my-1.5 mx-2" />
-                
-                <button className="flex items-center justify-between w-full gap-3 px-3 py-2.5 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors font-medium">
-                  <div className="flex items-center gap-3">
-                    <ImagePlus size={18} className="shrink-0" /> Create image
-                  </div>
-                  <span className="bg-white/10 px-2 py-0.5 rounded-full text-xs text-white">New</span>
-                </button>
               </div>
             )}
           </div>
