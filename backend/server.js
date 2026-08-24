@@ -277,6 +277,10 @@ Has Uploaded Image: ${hasImage ? "YES" : "NO"}
   }
 });
 
-app.listen(port, () => {
-  console.log(`Backend server is running on http://localhost:${port}`);
-});
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  app.listen(port, () => {
+    console.log(`Backend server is running on http://localhost:${port}`);
+  });
+}
+
+module.exports = app;
