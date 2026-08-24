@@ -713,52 +713,7 @@ function App() {
 
       {/* Main Content */}
       <main className="main-content relative flex flex-col h-full">
-        {/* Top Navbar */}
-        <header className="flex items-center justify-between px-4 sm:px-8 py-3 sm:py-5 bg-transparent z-50 shrink-0">
-          <div className="flex items-center w-1/4 sm:w-1/3">
-            {!isSidebarOpen && (
-              <button 
-                onClick={() => setIsSidebarOpen(true)}
-                className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10 sm:hidden" 
-                title="Expand menu"
-              >
-                <Menu size={24} />
-              </button>
-            )}
-          </div>
-          
-          <div className="flex justify-center w-2/4 sm:w-1/3">
-            <div 
-              className="flex items-center gap-2 sm:gap-3 text-white text-xl sm:text-3xl font-extrabold transition-colors tracking-tight"
-              style={{ fontFamily: 'var(--font-display)' }}
-            >
-              Rivo
-            </div>
-          </div>
-
-          <div className="flex items-center justify-end w-1/4 sm:w-1/3 gap-3">
-            {!user && (
-              <button 
-                className="text-sm font-semibold text-black bg-white hover:bg-gray-100 px-5 py-1.5 rounded-full transition-colors hidden sm:block"
-                onClick={() => {
-                  setForceSignIn(false);
-                  setShowAuthModal(true);
-                }}
-              >
-                Sign In
-              </button>
-            )}
-            {messages.length > 0 && (
-              <button 
-                className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10" 
-                title="New Chat"
-                onClick={handleNewChat}
-              >
-                <SquarePen size={24} />
-              </button>
-            )}
-          </div>
-        </header>
+        {/* Top Navbar Removed */}
 
         {messages.length === 0 ? (
           <div className="empty-state-centered">
