@@ -804,8 +804,6 @@ function App() {
                         <button onClick={() => handleCopy(msg.content, index)} className="text-gray-400 hover:text-gray-200 hover:bg-white/10 p-1.5 rounded-lg transition-colors" title="Copy">
                           {copiedIndex === index ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
                         </button>
-                        <button className="text-gray-400 hover:text-gray-200 hover:bg-white/10 p-1.5 rounded-lg transition-colors" title="Good response"><ThumbsUp size={16} /></button>
-                        <button className="text-gray-400 hover:text-gray-200 hover:bg-white/10 p-1.5 rounded-lg transition-colors" title="Bad response"><ThumbsDown size={16} /></button>
                         <button className="text-gray-400 hover:text-gray-200 hover:bg-white/10 p-1.5 rounded-lg transition-colors" title="Regenerate"><RotateCcw size={16} /></button>
                       </div>
                     )}
