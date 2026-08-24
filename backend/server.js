@@ -140,10 +140,14 @@ app.post('/api/chat', async (req, res) => {
     if (files && files.length > 0) {
       userMessageContent += '\n[File(s) Attached]';
       files.forEach(f => {
+        let mime = f.mimeType;
+        if (!mime || mime.trim() === '') {
+           mime = 'application/pdf';
+        }
         parts.push({
           inlineData: {
             data: f.data,
-            mimeType: f.mimeType
+            mimeType: mime
           }
         });
       });
@@ -268,6 +272,7 @@ Has Uploaded Image: ${hasImage ? "YES" : "NO"}
     res.json({ response: text, chatId: chatDoc._id });
   } catch (error) {
     console.error('Error calling Gemini API:', error);
+    if (error.response) console.error('Gemini API Error Response:', error.response.data);
     res.status(500).json({ error: 'Failed to generate response. Check your API key and network.' });
   }
 });

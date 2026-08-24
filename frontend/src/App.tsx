@@ -189,11 +189,19 @@ function App() {
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64Data = (reader.result as string).split(',')[1];
-        const previewUrl = file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined;
+        let resolvedMimeType = file.type;
+        if (!resolvedMimeType) {
+          const lowerName = file.name.toLowerCase();
+          if (lowerName.endsWith('.pdf')) resolvedMimeType = 'application/pdf';
+          else if (lowerName.endsWith('.png')) resolvedMimeType = 'image/png';
+          else if (lowerName.endsWith('.jpg') || lowerName.endsWith('.jpeg')) resolvedMimeType = 'image/jpeg';
+        }
+        
+        const previewUrl = resolvedMimeType.startsWith('image/') ? URL.createObjectURL(file) : undefined;
         setAttachments(prev => [...prev, {
           file,
           base64: base64Data,
-          mimeType: file.type,
+          mimeType: resolvedMimeType,
           previewUrl
         }]);
       };
