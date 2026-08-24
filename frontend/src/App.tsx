@@ -299,6 +299,7 @@ function App() {
     };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
+    setAttachments([]);
     setIsLoading(true);
 
     abortControllerRef.current = new AbortController();
@@ -321,8 +322,6 @@ function App() {
       if (!isImageGen) {
         setIsAnimating(true);
       }
-      setAttachments([]);
-      
       if (!user) {
         const newCount = guestCount + 1;
         setGuestCount(newCount);
