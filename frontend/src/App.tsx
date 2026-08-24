@@ -554,7 +554,7 @@ function App() {
         onSuccess={handleLoginSuccess}
       />
       {/* Sidebar */}
-      <aside className={`sidebar ${isSidebarOpen ? '' : 'collapsed'} flex flex-col`}>
+      <aside className={`sidebar group ${isSidebarOpen ? '' : 'collapsed'} flex flex-col`}>
         {isSidebarOpen ? (
           <div className="p-3 flex items-center justify-between shrink-0">
             <button className="text-white hover:bg-white/10 px-2 py-1.5 rounded-lg transition-colors flex items-center gap-2">
@@ -574,7 +574,7 @@ function App() {
           <div className="p-3 flex flex-col items-center shrink-0 gap-3 pt-4">
             <button 
               onClick={() => setIsSidebarOpen(true)} 
-              className="group relative flex items-center justify-center text-white hover:bg-white/10 w-10 h-10 rounded-lg transition-colors mb-2"
+              className="relative flex items-center justify-center text-white hover:bg-white/10 w-10 h-10 rounded-lg transition-colors mb-2"
               title="Expand sidebar"
             >
               <WebsiteLogo size={24} className="absolute transition-opacity duration-200 group-hover:opacity-0" />
