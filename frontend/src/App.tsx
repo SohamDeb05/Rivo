@@ -570,13 +570,13 @@ function App() {
         <div className="flex-1 overflow-hidden flex flex-col">
           {isSidebarOpen && (
             <>
-              <div className="px-4 py-2 flex shrink-0">
+              <div className="px-3 py-1 flex shrink-0">
                 <button 
                   onClick={handleNewChat} 
-                  className="flex items-center text-gray-200 transition-colors rounded-full font-medium text-sm border border-white/5 gap-3 bg-[#1e1f20] hover:bg-[#2a2b2c] py-2.5 px-4 w-full"
+                  className="flex items-center text-gray-200 transition-colors rounded-xl font-medium text-sm gap-3 hover:bg-white/5 py-2.5 px-3 w-full"
                   title="New chat"
                 >
-                  <Plus size={20} className="shrink-0" />
+                  <SquarePen size={20} className="shrink-0" />
                   <span>New chat</span>
                 </button>
               </div>
