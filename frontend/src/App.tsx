@@ -5,6 +5,7 @@ import axios from 'axios';
 import { LiquidButton } from '@/components/ui/liquid-glass-button';
 import { DottedSurface } from '@/components/ui/dotted-surface';
 import { AuthModal } from '@/components/ui/auth-modal';
+import { EditProfileModal } from '@/components/ui/edit-profile-modal';
 import './index.css';
 
 interface Message {
@@ -165,6 +166,7 @@ function App() {
   // Auth & Guest State
   const [user, setUser] = useState<any>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showEditProfile, setShowEditProfile] = useState(false);
   const [forceSignIn, setForceSignIn] = useState(false);
   const [guestCount, setGuestCount] = useState(() => parseInt(localStorage.getItem('guestCount') || '0', 10));
 
@@ -635,7 +637,7 @@ function App() {
         <div ref={profileMenuRef} className={`mt-auto shrink-0 p-3 relative border-t border-white/10 ${isSidebarOpen ? '' : 'flex justify-center'}`}>
           {user && isProfileMenuOpen && (
             <div className={`absolute bottom-full left-3 mb-2 bg-[#2f2f2f] border border-white/10 rounded-2xl shadow-xl p-2 z-50 animate-in fade-in zoom-in-95 duration-100 ${isSidebarOpen ? 'w-[260px]' : 'w-[260px] left-14 bottom-0 mb-0'}`}>
-              <div className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-xl cursor-pointer">
+              <div onClick={() => setShowEditProfile(true)} className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-xl cursor-pointer">
                 <div className="w-8 h-8 rounded-full bg-black border border-white/20 flex items-center justify-center text-white font-bold text-sm shrink-0">
                   {user.name ? user.name.split(' ').map((n: string) => n[0]).join('').substring(0,2).toUpperCase() : (user.email ? user.email[0].toUpperCase() : 'U')}
                 </div>
@@ -646,7 +648,7 @@ function App() {
               
               <div className="h-px bg-white/10 my-1 mx-1" />
               
-              <button className="flex items-center w-full gap-3 px-2 py-2 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors">
+              <button onClick={() => setShowEditProfile(true)} className="flex items-center w-full gap-3 px-2 py-2 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors">
                 <User size={16} /> Profile
               </button>
               <button className="flex items-center w-full gap-3 px-2 py-2 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors">
@@ -846,6 +848,17 @@ function App() {
           </>
         )}
       </main>
+      <EditProfileModal 
+        isOpen={showEditProfile} 
+        onClose={() => setShowEditProfile(false)} 
+        user={user}
+        onSave={(updatedUser) => {
+          setUser(updatedUser);
+          if (localStorage.getItem('googleUser')) {
+            localStorage.setItem('googleUser', JSON.stringify(updatedUser));
+          }
+        }}
+      />
     </div>
   );
 }
