@@ -620,12 +620,6 @@ function App() {
               <div className="h-px bg-white/10 my-1 mx-1" />
               
               <button className="flex items-center w-full gap-3 px-2 py-2 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors">
-                <Sparkles size={16} /> Upgrade plan
-              </button>
-              <button className="flex items-center w-full gap-3 px-2 py-2 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors">
-                <Sparkles size={16} /> Personalization
-              </button>
-              <button className="flex items-center w-full gap-3 px-2 py-2 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors">
                 <User size={16} /> Profile
               </button>
               <button className="flex items-center w-full gap-3 px-2 py-2 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors">
