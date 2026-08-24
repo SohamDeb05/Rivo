@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Plus, Send, User, Sparkles, PanelLeft, SquarePen, Search, Store, Menu, Image as ImageIcon, Mic, MessageSquare, Settings, HelpCircle, History, Square, Trash, LogOut, Paperclip, Triangle, MoreHorizontal, ImagePlus, X, File as FileIcon, Copy, ThumbsUp, ThumbsDown, RotateCcw, Check } from 'lucide-react';
+import { Plus, Send, User, Sparkles, PanelLeft, SquarePen, Search, Store, Menu, Image as ImageIcon, Mic, MessageSquare, Settings, HelpCircle, History, Square, Trash, LogOut, Paperclip, Triangle, MoreHorizontal, ImagePlus, X, File as FileIcon, Copy, ThumbsUp, ThumbsDown, RotateCcw, Check, ArrowUp } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import axios from 'axios';
 import { LiquidButton } from '@/components/ui/liquid-glass-button';
@@ -449,34 +449,14 @@ function App() {
           </div>
         )}
 
-        <div className="flex px-2 w-full pt-1 pb-2">
-          <textarea
-            ref={textareaRef}
-            className={`flex-1 bg-transparent border-none outline-none text-gray-200 placeholder-gray-500 w-full resize-none min-h-[24px] max-h-[200px] overflow-y-auto custom-scrollbar ${isCentered ? 'text-lg' : 'text-base'}`}
-            value={input}
-            onChange={(e) => {
-               setInput(e.target.value);
-               e.target.style.height = 'auto';
-               e.target.style.height = Math.min(e.target.scrollHeight, 200) + 'px';
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSend();
-              }
-            }}
-            placeholder="Ask anything"
-            rows={1}
-            style={{ height: 'auto' }}
-          />
-        </div>
-
-        <div className="flex items-center justify-between w-full mt-1">
-          <div ref={attachmentMenuRef} className="relative">
+        {/* Text and Actions Row */}
+        <div className="flex items-end w-full gap-2 px-1">
+          {/* + Button */}
+          <div ref={attachmentMenuRef} className="relative pb-1 shrink-0">
             <input type="file" ref={fileInputRef} hidden multiple accept=".jpg,.jpeg,.png,.pdf" onChange={handleFileChange} />
             <button 
               onClick={() => setIsAttachmentMenuOpen(!isAttachmentMenuOpen)}
-              className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10 shrink-0"
+              className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10"
             >
               <Plus size={22} />
             </button>
@@ -489,14 +469,38 @@ function App() {
               </div>
             )}
           </div>
-          
-          <div className="flex items-center shrink-0 gap-1 pr-1">
+
+          {/* Textarea */}
+          <div className="flex-1 flex flex-col justify-center min-h-[44px]">
+            <textarea
+              ref={textareaRef}
+              className={`bg-transparent border-none outline-none text-gray-200 placeholder-gray-500 w-full resize-none custom-scrollbar py-2.5 ${isCentered ? 'text-lg' : 'text-base'}`}
+              value={input}
+              onChange={(e) => {
+                 setInput(e.target.value);
+                 e.target.style.height = 'auto';
+                 e.target.style.height = Math.min(e.target.scrollHeight, 200) + 'px';
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+              placeholder="Ask anything"
+              rows={1}
+              style={{ height: 'auto' }}
+            />
+          </div>
+
+          {/* Right Actions */}
+          <div className="flex items-center shrink-0 gap-1 pb-1 pr-1">
             <button className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10">
               <Mic size={20} />
             </button>
             {isLoading || isAnimating ? (
               <button 
-                className="flex items-center justify-center transition-all rounded-full bg-white hover:bg-gray-200 text-black w-[36px] h-[36px]" 
+                className="flex items-center justify-center transition-all rounded-full bg-[#3b82f6] hover:bg-blue-600 text-white w-[32px] h-[32px]" 
                 onClick={() => {
                   if (abortControllerRef.current) {
                     abortControllerRef.current.abort();
@@ -508,16 +512,16 @@ function App() {
                 title="Stop generating"
               >
                 <Square size={14} fill="currentColor" />
-            </button>
-          ) : (
-            <button 
-              className={`flex items-center justify-center transition-all rounded-full ${input.trim() || attachments.length > 0 ? 'text-black bg-white hover:bg-gray-200' : 'text-gray-500 bg-white/10'} w-[36px] h-[36px]`} 
-              onClick={handleSend}
-              disabled={!input.trim() && attachments.length === 0}
-            >
-              <Send size={18} className="mr-0.5 mt-0.5" />
-            </button>
-          )}
+              </button>
+            ) : (
+              <button 
+                className={`flex items-center justify-center transition-all rounded-full ${input.trim() || attachments.length > 0 ? 'bg-[#3b82f6] hover:bg-blue-600 text-white' : 'bg-white/10 text-gray-500'} w-[32px] h-[32px]`} 
+                onClick={handleSend}
+                disabled={!input.trim() && attachments.length === 0}
+              >
+                <ArrowUp size={20} />
+              </button>
+            )}
           </div>
         </div>
       </div>
