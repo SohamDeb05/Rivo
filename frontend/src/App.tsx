@@ -572,8 +572,13 @@ function App() {
           </div>
         ) : (
           <div className="p-3 flex flex-col items-center shrink-0 gap-3 pt-4">
-            <button onClick={() => setIsSidebarOpen(true)} className="text-white hover:bg-white/10 p-2 rounded-lg transition-colors mb-2">
-              <WebsiteLogo size={24} />
+            <button 
+              onClick={() => setIsSidebarOpen(true)} 
+              className="group relative flex items-center justify-center text-white hover:bg-white/10 w-10 h-10 rounded-lg transition-colors mb-2"
+              title="Expand sidebar"
+            >
+              <WebsiteLogo size={24} className="absolute transition-opacity duration-200 group-hover:opacity-0" />
+              <PanelLeft size={20} className="absolute opacity-0 transition-opacity duration-200 group-hover:opacity-100 text-gray-400 group-hover:text-white" />
             </button>
             
             <button onClick={() => { handleNewChat(); setIsSidebarOpen(true); }} className="text-gray-400 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors">
