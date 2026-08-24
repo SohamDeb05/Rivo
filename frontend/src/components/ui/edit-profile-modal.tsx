@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Camera, X } from 'lucide-react';
 
 interface EditProfileModalProps {
@@ -11,19 +11,33 @@ interface EditProfileModalProps {
 export function EditProfileModal({ isOpen, onClose, user, onSave }: EditProfileModalProps) {
   const [displayName, setDisplayName] = useState('');
   const [username, setUsername] = useState('');
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (user) {
       setDisplayName(user.name || '');
       setUsername(user.email ? user.email.split('@')[0] : '');
+      setPhotoUrl(user.picture || null);
     }
   }, [user, isOpen]);
 
   if (!isOpen) return null;
 
   const handleSave = () => {
-    onSave({ ...user, name: displayName });
+    onSave({ ...user, name: displayName, picture: photoUrl });
     onClose();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const initials = displayName
@@ -37,9 +51,20 @@ export function EditProfileModal({ isOpen, onClose, user, onSave }: EditProfileM
         <h2 className="text-xl font-semibold text-white mb-8">Edit profile</h2>
 
         <div className="flex justify-center mb-8">
-          <div className="relative group cursor-pointer">
-            <div className="w-24 h-24 rounded-full bg-[#7a8786] flex items-center justify-center text-white text-3xl font-medium shadow-inner transition-transform group-hover:scale-105">
-              {initials}
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleFileChange} 
+            accept="image/*" 
+            className="hidden" 
+          />
+          <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+            <div className="w-24 h-24 rounded-full bg-[#7a8786] flex items-center justify-center text-white text-3xl font-medium shadow-inner transition-transform group-hover:scale-105 overflow-hidden">
+              {photoUrl ? (
+                <img src={photoUrl} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                initials
+              )}
             </div>
             <div className="absolute bottom-0 right-0 bg-[#303030] border-2 border-[#212121] p-1.5 rounded-full text-gray-300 hover:text-white hover:bg-[#404040] transition-colors shadow-sm">
               <Camera size={16} />
