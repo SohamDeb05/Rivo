@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Plus, Send, User, Sparkles, PanelLeft, SquarePen, Search, Store, Menu, Image as ImageIcon, Mic, MessageSquare, Settings, HelpCircle, History, Square, Trash, LogOut, Paperclip, Triangle, MoreHorizontal, ImagePlus, X, File as FileIcon } from 'lucide-react';
+import { Plus, Send, User, Sparkles, PanelLeft, SquarePen, Search, Store, Menu, Image as ImageIcon, Mic, MessageSquare, Settings, HelpCircle, History, Square, Trash, LogOut, Paperclip, Triangle, MoreHorizontal, ImagePlus, X, File as FileIcon, Copy, ThumbsUp, ThumbsDown, RotateCcw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import axios from 'axios';
 import { LiquidButton } from '@/components/ui/liquid-glass-button';
@@ -777,7 +777,7 @@ function App() {
           <>
             <div className="chat-container no-scrollbar">
               {messages.map((msg, index) => (
-                <div key={index} className={`message ${msg.role === 'user' ? 'user' : 'bot'}`}>
+                <div key={index} className={`message group ${msg.role === 'user' ? 'user' : 'bot'}`}>
                   {msg.role === 'model' && (
                     <div className="flex-shrink-0 mr-4 w-9 h-9 mt-1 rounded-full bg-white/5 border border-white/10 shadow-sm flex items-center justify-center overflow-hidden">
                       <img src="/favicon.svg" alt="Rivo" className="w-7 h-7 opacity-90 scale-110" />
@@ -814,22 +814,34 @@ function App() {
                         </div>
                       ) : (
                       msg.isAnimated === false ? (
-                        <TypingMessage 
-                          content={msg.content} 
-                          isAnimating={isAnimating}
-                          onTyping={scrollToBottom}
-                          onComplete={() => {
-                            setMessages(prev => prev.map((m, i) => i === index ? { ...m, isAnimated: true } : m));
-                            setIsAnimating(false);
-                          }} 
-                          onStop={(partial) => {
-                            setMessages(prev => prev.map((m, i) => i === index ? { ...m, isAnimated: true, content: partial } : m));
-                            setIsAnimating(false);
-                          }}
-                        />
+                        <div className="markdown-body text-gray-200">
+                          <TypingMessage 
+                            content={msg.content} 
+                            isAnimating={isAnimating}
+                            onTyping={scrollToBottom}
+                            onComplete={() => {
+                              setMessages(prev => prev.map((m, i) => i === index ? { ...m, isAnimated: true } : m));
+                              setIsAnimating(false);
+                            }} 
+                            onStop={(partial) => {
+                              setMessages(prev => prev.map((m, i) => i === index ? { ...m, isAnimated: true, content: partial } : m));
+                              setIsAnimating(false);
+                            }}
+                          />
+                        </div>
                       ) : (
-                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                        <div className="markdown-body text-gray-200">
+                          <ReactMarkdown>{msg.content}</ReactMarkdown>
+                        </div>
                       )
+                    )}
+                    {msg.role === 'model' && (
+                      <div className="flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 -ml-1">
+                        <button className="text-gray-400 hover:text-gray-200 hover:bg-white/10 p-1.5 rounded-lg transition-colors" title="Copy"><Copy size={16} /></button>
+                        <button className="text-gray-400 hover:text-gray-200 hover:bg-white/10 p-1.5 rounded-lg transition-colors" title="Good response"><ThumbsUp size={16} /></button>
+                        <button className="text-gray-400 hover:text-gray-200 hover:bg-white/10 p-1.5 rounded-lg transition-colors" title="Bad response"><ThumbsDown size={16} /></button>
+                        <button className="text-gray-400 hover:text-gray-200 hover:bg-white/10 p-1.5 rounded-lg transition-colors" title="Regenerate"><RotateCcw size={16} /></button>
+                      </div>
                     )}
                   </div>
                   </div>
