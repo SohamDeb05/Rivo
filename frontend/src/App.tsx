@@ -545,11 +545,27 @@ function App() {
       />
       {/* Sidebar */}
       <aside className={`sidebar ${isSidebarOpen ? '' : 'collapsed'} flex flex-col`}>
-        <div className={`p-4 flex items-center shrink-0 ${isSidebarOpen ? '' : 'justify-center'}`}>
-          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-gray-400 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors">
-            <Menu size={24} />
-          </button>
-        </div>
+        {isSidebarOpen ? (
+          <div className="p-3 flex items-center justify-between shrink-0">
+            <button className="text-white hover:bg-white/10 px-2 py-1.5 rounded-lg transition-colors flex items-center">
+              <span className="font-semibold text-[15px]">Rivo</span>
+            </button>
+            <div className="flex items-center gap-0.5">
+              <button className="text-gray-400 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors">
+                <Search size={18} />
+              </button>
+              <button onClick={() => setIsSidebarOpen(false)} className="text-gray-400 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors">
+                <PanelLeft size={18} />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="p-3 flex items-center justify-center shrink-0">
+            <button onClick={() => setIsSidebarOpen(true)} className="text-gray-400 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors">
+              <Menu size={20} />
+            </button>
+          </div>
+        )}
         
         <div className="flex-1 overflow-hidden flex flex-col">
           {isSidebarOpen && (
