@@ -108,23 +108,14 @@ const HackerGreeting = () => {
   return <h2>{displayedText}</h2>;
 };
 const WebsiteLogo = ({ size = 24, className = "" }: { size?: number, className?: string }) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
+  <img 
+    src="/favicon.svg" 
+    alt="Rivo Logo" 
     width={size} 
     height={size} 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2.2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="m12.5 3-1.6 5a2.5 2.5 0 0 1-1.4 1.4l-5 1.6 5 1.6a2.5 2.5 0 0 1 1.4 1.4l1.6 5 1.6-5a2.5 2.5 0 0 1 1.4-1.4l5-1.6-5-1.6a2.5 2.5 0 0 1-1.4-1.4l-1.6-5Z" />
-    <circle cx="5" cy="19" r="1.5" />
-    <path d="M19 4v4" />
-    <path d="M17 6h4" />
-  </svg>
+    className={className} 
+    style={{ borderRadius: '50%' }}
+  />
 );
 
 function App() {
