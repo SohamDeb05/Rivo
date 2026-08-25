@@ -6,6 +6,7 @@ import { LiquidButton } from '@/components/ui/liquid-glass-button';
 import { DottedSurface } from '@/components/ui/dotted-surface';
 import { AuthModal } from '@/components/ui/auth-modal';
 import { EditProfileModal } from '@/components/ui/edit-profile-modal';
+import { SettingsModal } from '@/components/ui/settings-modal';
 import './index.css';
 
 interface Message {
@@ -177,6 +178,9 @@ function App() {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const [isAttachmentMenuOpen, setIsAttachmentMenuOpen] = useState(false);
+  const attachmentMenuRef = useRef<HTMLDivElement>(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [modelPreference, setModelPreference] = useState('gemini-1.5-pro');
   const attachmentMenuRef = useRef<HTMLDivElement>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
@@ -366,7 +370,8 @@ function App() {
         message: textToSend,
         chatId: currentChatId,
         userId: currentUserId,
-        files: attachments.map(a => ({ data: a.base64, mimeType: a.mimeType }))
+        files: hasAttachments ? filesData : undefined,
+        modelPreference: modelPreference,
       }, {
         signal: abortControllerRef.current.signal
       });
@@ -439,6 +444,7 @@ function App() {
         files: filesToRegenerate,
         chatId: currentChatId,
         userId: currentUserId,
+        modelPreference: modelPreference,
       }, {
         signal: abortControllerRef.current.signal
       });
@@ -512,11 +518,33 @@ function App() {
     }
   };
 
+  const handleClearHistory = async () => {
+    try {
+      const currentUserId = user ? user.sub : localStorage.getItem('guestId');
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:7000';
+      await axios.delete(`${apiUrl}/api/chat/all?userId=${currentUserId}`);
+      setChatHistoryList([]);
+      if (currentChatId) {
+        setMessages([]);
+        setCurrentChatId(null);
+      }
+    } catch (error) {
+      console.error('Failed to clear history:', error);
+    }
+  };
+
   const handleSuggestionClick = (text: string) => {
     executeSend(text);
   };
   
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleSaveProfile = (updatedUser: any) => {
+    setUser(updatedUser);
+    if (localStorage.getItem('googleUser')) {
+      localStorage.setItem('googleUser', JSON.stringify(updatedUser));
+    }
+  };
 
   useEffect(() => {
     if (input === '' && textareaRef.current) {
@@ -770,7 +798,7 @@ function App() {
               <button onClick={() => setShowEditProfile(true)} className="flex items-center w-full gap-3 px-2 py-2 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors">
                 <User size={16} /> Profile
               </button>
-              <button className="flex items-center w-full gap-3 px-2 py-2 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors">
+              <button onClick={() => { setShowSettings(true); setIsProfileMenuOpen(false); }} className="flex items-center w-full gap-3 px-2 py-2 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors">
                 <Settings size={16} /> Settings
               </button>
               
@@ -946,12 +974,14 @@ function App() {
         isOpen={showEditProfile} 
         onClose={() => setShowEditProfile(false)} 
         user={user}
-        onSave={(updatedUser) => {
-          setUser(updatedUser);
-          if (localStorage.getItem('googleUser')) {
-            localStorage.setItem('googleUser', JSON.stringify(updatedUser));
-          }
-        }}
+        onSave={handleSaveProfile}
+      />
+      <SettingsModal 
+        isOpen={showSettings} 
+        onClose={() => setShowSettings(false)} 
+        modelPreference={modelPreference}
+        setModelPreference={setModelPreference}
+        onClearHistory={handleClearHistory}
       />
     </div>
   );

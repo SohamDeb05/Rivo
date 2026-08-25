@@ -71,6 +71,21 @@ app.get('/api/chats/:id', async (req, res) => {
   }
 });
 
+// Delete all chats for a user
+app.delete('/api/chat/all', async (req, res) => {
+  try {
+    const userId = req.query.userId;
+    if (!userId) {
+      return res.status(400).json({ error: 'userId is required' });
+    }
+    await Chat.deleteMany({ userId });
+    res.json({ message: 'All chats deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting all chats:', error);
+    res.status(500).json({ error: 'Failed to delete all chats' });
+  }
+});
+
 // Delete a specific chat
 app.delete('/api/chats/:id', async (req, res) => {
   try {
@@ -106,7 +121,7 @@ app.get('/api/media/:chatId/:messageIndex/:attachmentIndex', async (req, res) =>
 
 app.post('/api/chat', async (req, res) => {
   try {
-    let { message, chatId, userId, files, regenerate } = req.body;
+    let { message, chatId, userId, files, regenerate, modelPreference } = req.body;
 
     if (!userId) {
       return res.status(400).json({ error: 'userId is required' });
@@ -257,7 +272,7 @@ Has Uploaded Image: ${hasImage ? "YES" : "NO"}
       }
     } else {
       // Standard text chat
-      const modelName = "gemini-1.5-pro";
+      const modelName = modelPreference || "gemini-1.5-pro";
       const model = genAI.getGenerativeModel({ 
         model: modelName,
         systemInstruction: "You are a helpful AI assistant named Rivo. Your name is Rivo. Always introduce yourself as Rivo if asked."
