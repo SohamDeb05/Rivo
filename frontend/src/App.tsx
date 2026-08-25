@@ -802,7 +802,7 @@ function App() {
               <button onClick={() => setShowEditProfile(true)} className="flex items-center w-full gap-3 px-2 py-2 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors">
                 <User size={16} /> Profile
               </button>
-              <button onClick={() => { setShowSettings(true); setIsProfileMenuOpen(false); }} className="flex items-center w-full gap-3 px-2 py-2 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors">
+              <button onClick={(e) => { e.stopPropagation(); setShowSettings(true); }} className="flex items-center w-full gap-3 px-2 py-2 text-sm text-gray-200 hover:bg-white/5 rounded-xl transition-colors">
                 <Settings size={16} /> Settings
               </button>
               
