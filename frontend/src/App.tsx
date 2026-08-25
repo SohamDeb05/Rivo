@@ -411,6 +411,55 @@ function App() {
     }
   };
 
+  const handleRegenerate = async () => {
+    if (messages.length < 2 || !currentChatId) return;
+    
+    // Optimistically remove the last bot response from UI
+    setMessages(prev => {
+      const newMsgs = [...prev];
+      if (newMsgs[newMsgs.length - 1].role === 'model') {
+        newMsgs.pop();
+      }
+      return newMsgs;
+    });
+    
+    setIsLoading(true);
+    abortControllerRef.current = new AbortController();
+
+    try {
+      const currentUserId = user ? user.sub : localStorage.getItem('guestId');
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:7000';
+      const response = await axios.post(`${apiUrl}/api/chat`, {
+        regenerate: true,
+        chatId: currentChatId,
+        userId: currentUserId,
+      }, {
+        signal: abortControllerRef.current.signal
+      });
+
+      const isImageGen = response.data.response.includes('![Generated Image]');
+      const botMessage: Message = { role: 'model', content: response.data.response, isAnimated: isImageGen };
+      setMessages(prev => [...prev, botMessage]);
+      if (!isImageGen) {
+        setIsAnimating(true);
+      }
+    } catch (error) {
+      if (axios.isCancel(error)) {
+        console.log('Request canceled by user');
+        return; 
+      }
+      console.error('Error regenerating response:', error);
+      const errorMessage: Message = { 
+        role: 'model', 
+        content: 'Sorry, I encountered an error regenerating the response.',
+        isAnimated: false
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSend = () => {
     executeSend(input);
   };
@@ -855,7 +904,11 @@ function App() {
                         <button onClick={() => handleCopy(msg.content, index)} className="text-gray-400 hover:text-gray-200 hover:bg-white/10 p-1.5 rounded-lg transition-colors" title="Copy">
                           {copiedIndex === index ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
                         </button>
-                        <button className="text-gray-400 hover:text-gray-200 hover:bg-white/10 p-1.5 rounded-lg transition-colors" title="Regenerate"><RotateCcw size={16} /></button>
+                        {index === messages.length - 1 && currentChatId && (
+                          <button onClick={handleRegenerate} className="text-gray-400 hover:text-gray-200 hover:bg-white/10 p-1.5 rounded-lg transition-colors" title="Regenerate">
+                            <RotateCcw size={16} />
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>

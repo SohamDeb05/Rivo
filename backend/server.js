@@ -106,11 +106,8 @@ app.get('/api/media/:chatId/:messageIndex/:attachmentIndex', async (req, res) =>
 
 app.post('/api/chat', async (req, res) => {
   try {
-    const { message, chatId, userId, files } = req.body;
+    let { message, chatId, userId, files, regenerate } = req.body;
 
-    if (!message) {
-      return res.status(400).json({ error: 'Message is required' });
-    }
     if (!userId) {
       return res.status(400).json({ error: 'userId is required' });
     }
@@ -121,24 +118,54 @@ app.post('/api/chat', async (req, res) => {
 
     // Find or create chat document
     let isNewChat = false;
+    let chatDoc;
     if (chatId) {
       chatDoc = await Chat.findOne({ _id: chatId, userId });
       if (!chatDoc) {
         return res.status(404).json({ error: 'Chat not found or unauthorized' });
       }
     } else {
+      if (!message) return res.status(400).json({ error: 'Message is required' });
       // Create new chat with a temporary title
       const title = message.length > 30 ? message.substring(0, 30) + '...' : message;
       chatDoc = new Chat({ title, userId, messages: [] });
       isNewChat = true;
     }
 
-    // Prepare message parts
     let userMessageContent = message;
-    let parts = [{ text: message }];
+    let parts = [];
+    let originalMessageText = message;
 
+    if (regenerate) {
+       if (chatDoc.messages.length > 0 && chatDoc.messages[chatDoc.messages.length - 1].role === 'model') {
+           chatDoc.messages.pop(); // Remove the last bot response
+       }
+       if (chatDoc.messages.length > 0 && chatDoc.messages[chatDoc.messages.length - 1].role === 'user') {
+           const lastUserMsg = chatDoc.messages[chatDoc.messages.length - 1];
+           message = lastUserMsg.content;
+           originalMessageText = message.replace('\n[File(s) Attached]', '');
+           files = lastUserMsg.attachments;
+       } else {
+           return res.status(400).json({ error: 'No user message to regenerate from' });
+       }
+    } else {
+       if (!message) return res.status(400).json({ error: 'Message is required' });
+       
+       if (files && files.length > 0) {
+         userMessageContent += '\n[File(s) Attached]';
+       }
+
+       // Add user message to document
+       chatDoc.messages.push({ 
+         role: 'user', 
+         content: userMessageContent,
+         attachments: files && files.length > 0 ? files.map(f => ({ data: f.data, mimeType: f.mimeType })) : undefined
+       });
+    }
+
+    // Build parts for the current message
+    parts.push({ text: originalMessageText });
     if (files && files.length > 0) {
-      userMessageContent += '\n[File(s) Attached]';
       files.forEach(f => {
         let mime = f.mimeType;
         if (!mime || mime.trim() === '') {
@@ -152,13 +179,6 @@ app.post('/api/chat', async (req, res) => {
         });
       });
     }
-
-    // Add user message to document
-    chatDoc.messages.push({ 
-      role: 'user', 
-      content: userMessageContent,
-      attachments: files && files.length > 0 ? files.map(f => ({ data: f.data, mimeType: f.mimeType })) : undefined
-    });
 
     // Smart Intent Detection: Generate, Edit, or Text Chat
     const hasImage = files && files.length > 0;
