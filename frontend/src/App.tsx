@@ -414,14 +414,18 @@ function App() {
   const handleRegenerate = async () => {
     if (messages.length < 2 || !currentChatId) return;
     
+    const msgs = [...messages];
+    if (msgs[msgs.length - 1].role === 'model') {
+      msgs.pop();
+    }
+    const lastUserMsg = msgs[msgs.length - 1];
+    if (!lastUserMsg || lastUserMsg.role !== 'user') return;
+
+    let contentToRegenerate = lastUserMsg.content.replace('\n[File(s) Attached]', '');
+    let filesToRegenerate = lastUserMsg.attachments;
+
     // Optimistically remove the last bot response from UI
-    setMessages(prev => {
-      const newMsgs = [...prev];
-      if (newMsgs[newMsgs.length - 1].role === 'model') {
-        newMsgs.pop();
-      }
-      return newMsgs;
-    });
+    setMessages(msgs);
     
     setIsLoading(true);
     abortControllerRef.current = new AbortController();
@@ -431,6 +435,8 @@ function App() {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:7000';
       const response = await axios.post(`${apiUrl}/api/chat`, {
         regenerate: true,
+        message: contentToRegenerate,
+        files: filesToRegenerate,
         chatId: currentChatId,
         userId: currentUserId,
       }, {

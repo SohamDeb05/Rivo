@@ -142,11 +142,25 @@ app.post('/api/chat', async (req, res) => {
        }
        if (chatDoc.messages.length > 0 && chatDoc.messages[chatDoc.messages.length - 1].role === 'user') {
            const lastUserMsg = chatDoc.messages[chatDoc.messages.length - 1];
-           message = lastUserMsg.content;
-           originalMessageText = message.replace('\n[File(s) Attached]', '');
-           files = lastUserMsg.attachments;
+           if (!message) {
+               message = lastUserMsg.content;
+               originalMessageText = message.replace('\n[File(s) Attached]', '');
+               files = lastUserMsg.attachments;
+           } else {
+               originalMessageText = message;
+           }
        } else {
-           return res.status(400).json({ error: 'No user message to regenerate from' });
+           if (!message) return res.status(400).json({ error: 'Message is required to regenerate an unsaved message' });
+           if (files && files.length > 0) {
+             userMessageContent += '\n[File(s) Attached]';
+           }
+           // Add user message to document since it wasn't there
+           chatDoc.messages.push({ 
+             role: 'user', 
+             content: userMessageContent,
+             attachments: files && files.length > 0 ? files.map(f => ({ data: f.data, mimeType: f.mimeType })) : undefined
+           });
+           originalMessageText = message;
        }
     } else {
        if (!message) return res.status(400).json({ error: 'Message is required' });
