@@ -748,7 +748,7 @@ function App() {
                     <span className="text-sm font-medium text-white truncate leading-tight">{user.name || user.email}</span>
                   </div>
                   <div className="w-px h-5 bg-white/15 mx-1" />
-                  <Store size={18} className="text-gray-400 shrink-0" />
+                  <Settings size={18} className="text-gray-400 shrink-0" />
                 </>
               )}
             </button>

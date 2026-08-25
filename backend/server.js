@@ -162,21 +162,28 @@ app.post('/api/chat', async (req, res) => {
 
     // Smart Intent Detection: Generate, Edit, or Text Chat
     const hasImage = files && files.length > 0;
-    const intentPrompt = `Does this user request ask to generate a new image, OR edit/modify an existing image?
+    
+    let imageMode = 'NO';
+    const msgLower = message.toLowerCase();
+    const imageKeywords = ['image', 'picture', 'photo', 'pic', 'generate', 'create', 'draw', 'edit', 'modify'];
+    const mightBeImageRequest = imageKeywords.some(kw => msgLower.includes(kw)) || hasImage;
+
+    if (mightBeImageRequest) {
+      const intentPrompt = `Does this user request ask to generate a new image, OR edit/modify an existing image?
 Respond with exactly "GENERATE" if they want a new image.
 Respond with exactly "EDIT" if they want to modify/edit an image.
 Respond with exactly "NO" if it's just a normal text chat.
 Request: "${message}"
 Has Uploaded Image: ${hasImage ? "YES" : "NO"}
 `;
-    const intentModel = genAI.getGenerativeModel({ model: "gemini-flash-lite-latest" });
-    const intentResult = await intentModel.generateContent(intentPrompt);
-    const intentStr = intentResult.response.text().trim().toUpperCase();
-    
-    // If they ask to edit but didn't upload an image, treat it as GENERATE
-    const imageMode = intentStr.includes('EDIT') ? (hasImage ? 'EDIT' : 'GENERATE') 
-                    : intentStr.includes('GENERATE') ? 'GENERATE' 
-                    : 'NO';
+      const intentModel = genAI.getGenerativeModel({ model: "gemini-flash-lite-latest" });
+      const intentResult = await intentModel.generateContent(intentPrompt);
+      const intentStr = intentResult.response.text().trim().toUpperCase();
+      
+      imageMode = intentStr.includes('EDIT') ? (hasImage ? 'EDIT' : 'GENERATE') 
+                      : intentStr.includes('GENERATE') ? 'GENERATE' 
+                      : 'NO';
+    }
 
     let titlePromise = null;
     if (isNewChat) {
@@ -252,24 +259,27 @@ Has Uploaded Image: ${hasImage ? "YES" : "NO"}
 
     // Add bot message to document
     chatDoc.messages.push({ role: 'model', content: text });
-
-    if (isNewChat && titlePromise) {
-      try {
-        const titleResult = await titlePromise;
-        let generatedTitle = titleResult.response.text().trim();
-        // Remove quotes if the AI included them
-        generatedTitle = generatedTitle.replace(/^["'](.*)["']$/, '$1');
-        if (generatedTitle) {
-          chatDoc.title = generatedTitle;
-        }
-      } catch (e) {
-        console.error("Failed to generate smart title", e);
-      }
-    }
-
     await chatDoc.save();
 
     res.json({ response: text, chatId: chatDoc._id });
+
+    if (isNewChat && titlePromise) {
+      // Process title asynchronously to avoid blocking response
+      titlePromise.then(async (titleResult) => {
+        try {
+          let generatedTitle = titleResult.response.text().trim();
+          generatedTitle = generatedTitle.replace(/^["'](.*)["']$/, '$1');
+          if (generatedTitle) {
+            chatDoc.title = generatedTitle;
+            await chatDoc.save();
+          }
+        } catch (e) {
+          console.error("Failed to update smart title", e);
+        }
+      }).catch(e => {
+        console.error("Failed to generate smart title", e);
+      });
+    }
   } catch (error) {
     console.error('Error calling Gemini API:', error);
     if (error.response) console.error('Gemini API Error Response:', error.response.data);
