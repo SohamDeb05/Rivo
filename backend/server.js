@@ -257,7 +257,7 @@ Has Uploaded Image: ${hasImage ? "YES" : "NO"}
       }
     } else {
       // Standard text chat
-      const modelName = (files && files.length > 0) ? "gemini-flash-latest" : "gemini-flash-lite-latest";
+      const modelName = "gemini-1.5-pro";
       const model = genAI.getGenerativeModel({ 
         model: modelName,
         systemInstruction: "You are a helpful AI assistant named Rivo. Your name is Rivo. Always introduce yourself as Rivo if asked."
