@@ -274,7 +274,7 @@ function App() {
     try {
       const currentUserId = uid || (user ? user.sub : localStorage.getItem('guestId'));
       if (!currentUserId) return;
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:7000';
+      const apiUrl = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:7000' : '');
       const response = await axios.get(`${apiUrl}/api/chats?userId=${currentUserId}`);
       setChatHistoryList(response.data);
     } catch (error) {
@@ -295,7 +295,7 @@ function App() {
       const guestId = localStorage.getItem('guestId');
       if (guestId) {
         try {
-          const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:7000';
+          const apiUrl = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:7000' : '');
           await axios.post(`${apiUrl}/api/chats/link`, {
             guestId,
             userId: userData.sub
@@ -369,7 +369,7 @@ function App() {
 
     try {
       const currentUserId = user ? user.sub : localStorage.getItem('guestId');
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:7000';
+      const apiUrl = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:7000' : '');
       const response = await axios.post(`${apiUrl}/api/chat`, {
         message: textToSend,
         chatId: currentChatId,
@@ -441,7 +441,7 @@ function App() {
 
     try {
       const currentUserId = user ? user.sub : localStorage.getItem('guestId');
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:7000';
+      const apiUrl = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:7000' : '');
       const response = await axios.post(`${apiUrl}/api/chat`, {
         regenerate: true,
         message: contentToRegenerate,
@@ -495,7 +495,7 @@ function App() {
 
   const loadChat = async (id: string) => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:7000';
+      const apiUrl = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:7000' : '');
       const response = await axios.get(`${apiUrl}/api/chats/${id}`);
       setCurrentChatId(id);
       setMessages(response.data.messages);
@@ -509,7 +509,7 @@ function App() {
 
   const handleDeleteChat = async (id: string) => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:7000';
+      const apiUrl = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:7000' : '');
       await axios.delete(`${apiUrl}/api/chats/${id}`);
       if (currentChatId === id) {
         setCurrentChatId(null);
@@ -525,7 +525,7 @@ function App() {
   const handleClearHistory = async () => {
     try {
       const currentUserId = user ? user.sub : localStorage.getItem('guestId');
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:7000';
+      const apiUrl = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:7000' : '');
       await axios.delete(`${apiUrl}/api/chat/all?userId=${currentUserId}`);
       setChatHistoryList([]);
       if (currentChatId) {

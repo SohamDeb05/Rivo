@@ -272,7 +272,11 @@ Has Uploaded Image: ${hasImage ? "YES" : "NO"}
       }
     } else {
       // Standard text chat
-      const modelName = modelPreference || "gemini-2.5-pro";
+      let modelName = modelPreference || "gemini-2.5-pro";
+      // Ensure deprecated 1.5 models are transparently upgraded for older frontend clients
+      if (modelName === "gemini-1.5-pro") modelName = "gemini-2.5-pro";
+      if (modelName === "gemini-1.5-flash") modelName = "gemini-2.5-flash";
+
       const model = genAI.getGenerativeModel({ 
         model: modelName,
         systemInstruction: "You are a helpful AI assistant named Rivo. Your name is Rivo. Always introduce yourself as Rivo if asked."
