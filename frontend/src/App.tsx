@@ -180,7 +180,7 @@ function App() {
   const [isAttachmentMenuOpen, setIsAttachmentMenuOpen] = useState(false);
   const attachmentMenuRef = useRef<HTMLDivElement>(null);
   const [showSettings, setShowSettings] = useState(false);
-  const [modelPreference, setModelPreference] = useState('gemini-1.5-pro');
+  const [modelPreference, setModelPreference] = useState('gemini-2.5-pro');
   const [isModelSelectorOpen, setIsModelSelectorOpen] = useState(false);
   const modelSelectorRef = useRef<HTMLDivElement>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -867,30 +867,30 @@ function App() {
               onClick={() => setIsModelSelectorOpen(!isModelSelectorOpen)}
               className="flex items-center gap-2 px-3 py-1.5 bg-transparent hover:bg-white/10 rounded-xl text-lg font-medium text-gray-200 transition-colors"
             >
-              {modelPreference === 'gemini-1.5-pro' ? 'Pro' : 'Flash'}
+              {modelPreference === 'gemini-2.5-pro' ? 'Pro' : 'Flash'}
               <Triangle size={10} className={`text-gray-400 transition-transform ${isModelSelectorOpen ? 'rotate-180' : 'rotate-180'} fill-current`} style={{ transform: isModelSelectorOpen ? 'rotate(180deg)' : 'rotate(180deg) scaleY(-1)' }} />
             </button>
             
             {isModelSelectorOpen && (
               <div className="absolute top-full mt-2 left-0 sm:left-1/2 sm:-translate-x-1/2 w-[280px] bg-[#2f2f2f] border border-white/10 rounded-2xl shadow-2xl p-2 animate-in fade-in slide-in-from-top-2 duration-200">
                 <button 
-                  onClick={() => { setModelPreference('gemini-1.5-flash'); setIsModelSelectorOpen(false); }}
+                  onClick={() => { setModelPreference('gemini-2.5-flash'); setIsModelSelectorOpen(false); }}
                   className="w-full flex items-start text-left p-3 rounded-xl hover:bg-white/5 transition-colors relative"
                 >
                   <div className="flex-1">
                     <div className="text-sm font-medium text-white flex items-center gap-2">
-                      Flash {modelPreference === 'gemini-1.5-flash' && <Check size={14} className="text-white" />}
+                      Flash {modelPreference === 'gemini-2.5-flash' && <Check size={14} className="text-white" />}
                     </div>
                     <div className="text-xs text-gray-400 mt-0.5">Fastest answers</div>
                   </div>
                 </button>
                 <button 
-                  onClick={() => { setModelPreference('gemini-1.5-pro'); setIsModelSelectorOpen(false); }}
+                  onClick={() => { setModelPreference('gemini-2.5-pro'); setIsModelSelectorOpen(false); }}
                   className="w-full flex items-start text-left p-3 rounded-xl hover:bg-white/5 transition-colors relative"
                 >
                   <div className="flex-1">
                     <div className="text-sm font-medium text-white flex items-center gap-2">
-                      Pro {modelPreference === 'gemini-1.5-pro' && <Check size={14} className="text-white" />}
+                      Pro {modelPreference === 'gemini-2.5-pro' && <Check size={14} className="text-white" />}
                     </div>
                     <div className="text-xs text-gray-400 mt-0.5">Advanced reasoning</div>
                   </div>

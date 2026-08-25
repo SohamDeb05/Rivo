@@ -60,27 +60,27 @@ export function SettingsModal({ isOpen, onClose, modelPreference, setModelPrefer
           <h3 className="text-sm font-medium text-gray-400 mb-3 uppercase tracking-wider">AI Intelligence</h3>
           <div className="space-y-3">
             <button
-              onClick={() => setModelPreference('gemini-1.5-pro')}
-              className={`w-full flex items-center p-3 rounded-xl border text-left transition-colors ${modelPreference === 'gemini-1.5-pro' ? 'border-[#8e44ad] bg-[#8e44ad]/10' : 'border-white/10 hover:bg-white/5'}`}
+              onClick={() => setModelPreference('gemini-2.5-pro')}
+              className={`w-full flex items-center p-3 rounded-xl border text-left transition-colors ${modelPreference === 'gemini-2.5-pro' ? 'border-[#8e44ad] bg-[#8e44ad]/10' : 'border-white/10 hover:bg-white/5'}`}
             >
-              <div className={`p-2 rounded-lg mr-3 ${modelPreference === 'gemini-1.5-pro' ? 'bg-[#8e44ad]/20 text-[#8e44ad]' : 'bg-white/5 text-gray-400'}`}>
+              <div className={`p-2 rounded-lg mr-3 ${modelPreference === 'gemini-2.5-pro' ? 'bg-[#8e44ad]/20 text-[#8e44ad]' : 'bg-white/5 text-gray-400'}`}>
                 <Cpu size={18} />
               </div>
               <div>
-                <div className={`text-sm font-medium ${modelPreference === 'gemini-1.5-pro' ? 'text-white' : 'text-gray-300'}`}>Gemini 1.5 Pro</div>
+                <div className={`text-sm font-medium ${modelPreference === 'gemini-2.5-pro' ? 'text-white' : 'text-gray-300'}`}>Gemini 2.5 Pro</div>
                 <div className="text-xs text-gray-500 mt-0.5">Most capable model for complex reasoning and tasks</div>
               </div>
             </button>
 
             <button
-              onClick={() => setModelPreference('gemini-1.5-flash')}
-              className={`w-full flex items-center p-3 rounded-xl border text-left transition-colors ${modelPreference === 'gemini-1.5-flash' ? 'border-[#8e44ad] bg-[#8e44ad]/10' : 'border-white/10 hover:bg-white/5'}`}
+              onClick={() => setModelPreference('gemini-2.5-flash')}
+              className={`w-full flex items-center p-3 rounded-xl border text-left transition-colors ${modelPreference === 'gemini-2.5-flash' ? 'border-[#8e44ad] bg-[#8e44ad]/10' : 'border-white/10 hover:bg-white/5'}`}
             >
-              <div className={`p-2 rounded-lg mr-3 ${modelPreference === 'gemini-1.5-flash' ? 'bg-[#8e44ad]/20 text-[#8e44ad]' : 'bg-white/5 text-gray-400'}`}>
+              <div className={`p-2 rounded-lg mr-3 ${modelPreference === 'gemini-2.5-flash' ? 'bg-[#8e44ad]/20 text-[#8e44ad]' : 'bg-white/5 text-gray-400'}`}>
                 <Zap size={18} />
               </div>
               <div>
-                <div className={`text-sm font-medium ${modelPreference === 'gemini-1.5-flash' ? 'text-white' : 'text-gray-300'}`}>Gemini 1.5 Flash</div>
+                <div className={`text-sm font-medium ${modelPreference === 'gemini-2.5-flash' ? 'text-white' : 'text-gray-300'}`}>Gemini 2.5 Flash</div>
                 <div className="text-xs text-gray-500 mt-0.5">Fastest model for standard everyday queries</div>
               </div>
             </button>
