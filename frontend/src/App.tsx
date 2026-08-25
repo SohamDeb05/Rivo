@@ -181,7 +181,8 @@ function App() {
   const attachmentMenuRef = useRef<HTMLDivElement>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [modelPreference, setModelPreference] = useState('gemini-1.5-pro');
-  const attachmentMenuRef = useRef<HTMLDivElement>(null);
+  const [isModelSelectorOpen, setIsModelSelectorOpen] = useState(false);
+  const modelSelectorRef = useRef<HTMLDivElement>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
   const handleCopy = (text: string, index: number) => {
@@ -200,6 +201,9 @@ function App() {
       }
       if (attachmentMenuRef.current && !attachmentMenuRef.current.contains(e.target as Node)) {
         setIsAttachmentMenuOpen(false);
+      }
+      if (modelSelectorRef.current && !modelSelectorRef.current.contains(e.target as Node)) {
+        setIsModelSelectorOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -856,7 +860,45 @@ function App() {
 
       {/* Main Content */}
       <main className="main-content relative flex flex-col h-full">
-        {/* Top Navbar Removed */}
+        {/* Model Selector */}
+        <div className="absolute top-4 left-4 sm:left-1/2 sm:-translate-x-1/2 z-50 pointer-events-auto">
+          <div ref={modelSelectorRef} className="relative">
+            <button 
+              onClick={() => setIsModelSelectorOpen(!isModelSelectorOpen)}
+              className="flex items-center gap-2 px-3 py-1.5 bg-transparent hover:bg-white/10 rounded-xl text-lg font-medium text-gray-200 transition-colors"
+            >
+              {modelPreference === 'gemini-1.5-pro' ? 'Pro' : 'Flash'}
+              <Triangle size={10} className={`text-gray-400 transition-transform ${isModelSelectorOpen ? 'rotate-180' : 'rotate-180'} fill-current`} style={{ transform: isModelSelectorOpen ? 'rotate(180deg)' : 'rotate(180deg) scaleY(-1)' }} />
+            </button>
+            
+            {isModelSelectorOpen && (
+              <div className="absolute top-full mt-2 left-0 sm:left-1/2 sm:-translate-x-1/2 w-[280px] bg-[#2f2f2f] border border-white/10 rounded-2xl shadow-2xl p-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                <button 
+                  onClick={() => { setModelPreference('gemini-1.5-flash'); setIsModelSelectorOpen(false); }}
+                  className="w-full flex items-start text-left p-3 rounded-xl hover:bg-white/5 transition-colors relative"
+                >
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-white flex items-center gap-2">
+                      Flash {modelPreference === 'gemini-1.5-flash' && <Check size={14} className="text-white" />}
+                    </div>
+                    <div className="text-xs text-gray-400 mt-0.5">Fastest answers</div>
+                  </div>
+                </button>
+                <button 
+                  onClick={() => { setModelPreference('gemini-1.5-pro'); setIsModelSelectorOpen(false); }}
+                  className="w-full flex items-start text-left p-3 rounded-xl hover:bg-white/5 transition-colors relative"
+                >
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-white flex items-center gap-2">
+                      Pro {modelPreference === 'gemini-1.5-pro' && <Check size={14} className="text-white" />}
+                    </div>
+                    <div className="text-xs text-gray-400 mt-0.5">Advanced reasoning</div>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
 
         {messages.length === 0 ? (
           <div className="empty-state-centered">
